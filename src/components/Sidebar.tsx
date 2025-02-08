@@ -19,13 +19,15 @@ export const Sidebar = () => {
 
   return (
     <>
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 hover:bg-background-secondary transition-colors md:hidden"
-        aria-label="Toggle menu"
-      >
-        <Menu className="w-5 h-5 text-text-secondary" />
-      </button>
+      {isMobile && (
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="fixed top-4 left-4 z-50 p-1.5 rounded-lg bg-white/50 hover:bg-white/80 transition-all duration-300 backdrop-blur-sm border border-gray-100"
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-4 h-4 text-text-secondary" />
+        </button>
+      )}
 
       <div 
         className={`w-20 h-screen bg-white/80 backdrop-blur-md border-r border-gray-200 fixed left-0 top-0 transition-all duration-300 ease-in-out transform
@@ -33,7 +35,16 @@ export const Sidebar = () => {
           z-40`}
       >
         <div className="flex flex-col h-full p-4">
-          <div className="mb-8 flex items-center justify-center">
+          <div className="mb-8 flex items-center justify-center relative">
+            {!isMobile && (
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="absolute -right-3 top-0 p-1 rounded-lg bg-white/50 hover:bg-white/80 transition-all duration-300 backdrop-blur-sm border border-gray-100"
+                aria-label="Toggle sidebar"
+              >
+                <Menu className="w-3 h-3 text-text-secondary" />
+              </button>
+            )}
             <img
               src="/lovable-uploads/b91a5d97-e32a-46cf-a2f2-4cbc6b082417.png"
               alt="Logo"
