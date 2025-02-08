@@ -1,4 +1,3 @@
-
 import { Sidebar } from "@/components/Sidebar";
 import { PostCard } from "@/components/PostCard";
 import { Card } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Image, Smile, Link as LinkIcon, TrendingUp, Hash } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockPosts = [
   {
@@ -45,6 +45,7 @@ const trendingTopics = [
 const Index = () => {
   const [newPost, setNewPost] = useState("");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleCreatePost = () => {
     if (!newPost.trim()) {
@@ -66,8 +67,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background-secondary">
       <Sidebar />
-      <main className="ml-64 p-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-[1fr,320px] gap-6">
+      <main className="p-6 transition-all duration-300 ease-in-out">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-6">
           <div className="space-y-4">
             <Card className="overflow-hidden glass">
               <div className="p-6">
@@ -139,36 +140,38 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <Card className="overflow-hidden glass sticky top-6">
-              <div className="p-6">
-                <h2 className="font-semibold text-lg flex items-center gap-2 mb-4 text-text">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                  Trending in the Pond
-                </h2>
-                <ScrollArea className="h-[400px] pr-4">
-                  {trendingTopics.map((item, index) => (
-                    <div 
-                      key={index}
-                      className="py-3 group cursor-pointer hover:bg-primary/5 rounded-xl px-3 transition-all duration-200"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-1.5 text-text-secondary group-hover:text-primary transition-colors">
-                            <Hash className="w-4 h-4" />
-                            {item.topic}
+          {!isMobile && (
+            <div className="space-y-4">
+              <Card className="overflow-hidden glass sticky top-6">
+                <div className="p-6">
+                  <h2 className="font-semibold text-lg flex items-center gap-2 mb-4 text-text">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    Trending in the Pond
+                  </h2>
+                  <ScrollArea className="h-[400px] pr-4">
+                    {trendingTopics.map((item, index) => (
+                      <div 
+                        key={index}
+                        className="py-3 group cursor-pointer hover:bg-primary/5 rounded-xl px-3 transition-all duration-200"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="flex items-center gap-1.5 text-text-secondary group-hover:text-primary transition-colors">
+                              <Hash className="w-4 h-4" />
+                              {item.topic}
+                            </div>
+                            <p className="text-sm text-text-tertiary mt-1">
+                              {item.posts} posts
+                            </p>
                           </div>
-                          <p className="text-sm text-text-tertiary mt-1">
-                            {item.posts} posts
-                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </div>
-            </Card>
-          </div>
+                    ))}
+                  </ScrollArea>
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
     </div>
