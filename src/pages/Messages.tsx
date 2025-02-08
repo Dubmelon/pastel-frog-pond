@@ -2,6 +2,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { Input } from "@/components/ui/input";
 import { Search, Send } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockChats = [
   {
@@ -23,11 +24,13 @@ const mockChats = [
 ];
 
 const Messages = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-64 grid grid-cols-[320px,1fr] h-screen">
-        <div className="border-r border-border">
+      <main className={`${isMobile ? 'ml-0' : 'ml-20'} transition-all duration-300 grid grid-cols-1 md:grid-cols-[320px,1fr] h-screen`}>
+        <div className="border-r border-border bg-background-secondary/50">
           <div className="p-4 border-b border-border">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
@@ -66,12 +69,12 @@ const Messages = () => {
             ))}
           </div>
         </div>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-background">
           <div className="flex-1 p-6 flex items-center justify-center text-text-tertiary">
             Select a conversation to start messaging
           </div>
-          <div className="p-4 border-t border-border">
-            <div className="relative">
+          <div className="p-4 border-t border-border bg-background-secondary/50">
+            <div className="relative max-w-3xl mx-auto">
               <Input
                 placeholder="Type a message..."
                 className="pr-12"
