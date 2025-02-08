@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { PostCard } from "@/components/PostCard";
 import { Card } from "@/components/ui/card";
@@ -67,11 +68,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background-secondary">
       <Sidebar />
-      <main className="p-6 transition-all duration-300 ease-in-out">
+      <main className={`p-4 sm:p-6 transition-all duration-300 ease-in-out ${isMobile ? 'pb-20' : ''}`}>
         <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-6">
           <div className="space-y-4">
             <Card className="overflow-hidden glass">
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex gap-4">
                   <div className="relative group">
                     <img
@@ -128,14 +129,8 @@ const Index = () => {
             </Card>
             
             <div className="space-y-4">
-              {mockPosts.map((post, index) => (
-                <div
-                  key={post.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 150}ms` }}
-                >
-                  <PostCard {...post} />
-                </div>
+              {mockPosts.map((post) => (
+                <PostCard key={post.id} {...post} />
               ))}
             </div>
           </div>

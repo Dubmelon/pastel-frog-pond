@@ -4,41 +4,47 @@ import { Calendar, MapPin, Edit2, Link2, UserPlus } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockPosts = [
   {
+    id: 1,
     avatar: "/placeholder.svg",
     username: "FroggyUser",
     handle: "froggyuser",
-    content: "Just hopped into a new pond! The water is amazing 🌊",
+    content: "Just discovered the most amazing pond spot! Perfect for afternoon meditation 🌿",
     timestamp: "3h ago",
-    likes: 15,
-    comments: 3,
-    shares: 1,
+    likes: 42,
+    comments: 12,
+    shares: 5,
+    images: ["/placeholder.svg"],
   },
   {
+    id: 2,
     avatar: "/placeholder.svg",
     username: "FroggyUser",
     handle: "froggyuser",
     content: "Found the perfect lily pad spot for meditation 🧘‍♂️",
     timestamp: "1d ago",
-    likes: 42,
-    comments: 7,
-    shares: 4,
+    likes: 24,
+    comments: 8,
+    shares: 2,
   },
 ];
 
 const Profile = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-64 animate-fade-in">
+      <main className={`${isMobile ? 'ml-0 pb-20' : 'ml-20'} transition-all duration-300`}>
         {/* Banner with glassmorphism effect */}
-        <div className="relative h-48 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/10 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/10">
           <div className="absolute inset-0 backdrop-blur-sm" />
         </div>
 
-        <div className="max-w-2xl mx-auto px-6">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <div className="relative">
             {/* Profile Image with hover effect */}
             <div className="absolute -top-16 group">
@@ -71,8 +77,8 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Bio with subtle animation */}
-              <p className="mt-3 text-text-secondary animate-fade-in">
+              {/* Bio */}
+              <p className="mt-3 text-text-secondary">
                 Just a happy frog hopping around the digital pond 🐸
               </p>
 
@@ -88,7 +94,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Stats with hover effects */}
+              {/* Stats */}
               <div className="flex items-center gap-6 mt-4">
                 <button className="hover:text-primary transition-colors">
                   <span className="font-semibold">528</span>{" "}
@@ -102,14 +108,14 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Navigation Tabs with animations */}
+          {/* Navigation Tabs */}
           <div className="border-t border-border mt-4">
-            <nav className="flex">
+            <nav className="flex overflow-x-auto">
               {["Posts", "Replies", "Media", "Likes"].map((tab, index) => (
                 <button
                   key={tab}
                   className={cn(
-                    "px-4 py-3 font-medium transition-colors relative",
+                    "px-4 py-3 font-medium transition-colors relative whitespace-nowrap",
                     index === 0
                       ? "text-primary"
                       : "text-text-tertiary hover:text-text hover:bg-background-secondary"
@@ -117,23 +123,17 @@ const Profile = () => {
                 >
                   {tab}
                   {index === 0 && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary animate-scale-in" />
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary" />
                   )}
                 </button>
               ))}
             </nav>
           </div>
 
-          {/* Posts Feed with stagger animation */}
+          {/* Posts Feed */}
           <div className="py-4 space-y-4">
-            {mockPosts.map((post, index) => (
-              <div
-                key={index}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <PostCard {...post} />
-              </div>
+            {mockPosts.map((post) => (
+              <PostCard key={post.id} {...post} />
             ))}
           </div>
         </div>
