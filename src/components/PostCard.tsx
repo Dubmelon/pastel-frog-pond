@@ -55,7 +55,7 @@ export const PostCard = ({
     <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in border border-primary/10 group">
       <div className="flex items-start space-x-3">
         <img
-          src={avatar}
+          src={avatar || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=64&h=64&fit=crop&crop=faces"}
           alt={username}
           className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 group-hover:border-primary transition-colors"
         />
@@ -82,9 +82,13 @@ export const PostCard = ({
           </div>
           <p className="mt-2 text-text-secondary whitespace-pre-wrap">{content}</p>
           
-          {images.length > 0 && (
+          {images && images.length > 0 && (
             <div className="mt-3 rounded-lg overflow-hidden">
-              <img src={images[0]} alt="Post content" className="w-full h-auto" />
+              <img 
+                src={images[0] || "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop"} 
+                alt="Post content" 
+                className="w-full h-auto"
+              />
             </div>
           )}
 

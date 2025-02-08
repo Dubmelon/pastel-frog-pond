@@ -1,4 +1,3 @@
-
 import { Sidebar } from "@/components/Sidebar";
 import { PostCard } from "@/components/PostCard";
 import { Card } from "@/components/ui/card";
@@ -13,34 +12,47 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const mockPosts = [
   {
     id: 1,
-    avatar: "/placeholder.svg",
+    avatar: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=64&h=64&fit=crop&crop=faces",
     username: "Lily Pad",
     handle: "lilypad",
-    content: "Just discovered the most amazing pond spot! Perfect for afternoon meditation 🌿",
+    content: "Just discovered the most amazing pond spot! Perfect for afternoon meditation 🌿 #PondLife",
     timestamp: "2h ago",
     likes: 42,
     comments: 12,
     shares: 5,
-    images: ["/placeholder.svg"],
+    images: ["https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop"],
   },
   {
     id: 2,
-    avatar: "/placeholder.svg",
+    avatar: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=64&h=64&fit=crop&crop=faces",
     username: "Hoppy",
     handle: "hopmaster",
-    content: "The water is particularly refreshing today. Who's up for a swim? 🌊",
+    content: "Working on some new features for our pond community! 🐸 Can't wait to share what we've been building. #WebDev #FrogTech",
     timestamp: "4h ago",
-    likes: 24,
-    comments: 8,
-    shares: 2,
+    likes: 89,
+    comments: 23,
+    shares: 7,
+    images: ["https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop"],
   },
+  {
+    id: 3,
+    avatar: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=64&h=64&fit=crop&crop=faces",
+    username: "TechToad",
+    handle: "techtoad",
+    content: "Just launched my new project! Check out these cool designs for our lily pad interface 🎨 #DesignThinking",
+    timestamp: "6h ago",
+    likes: 156,
+    comments: 42,
+    shares: 15,
+  }
 ];
 
 const trendingTopics = [
-  { topic: "PondLife", posts: "2.4k" },
-  { topic: "FrogMeet2024", posts: "1.8k" },
-  { topic: "LilyPadTips", posts: "956" },
-  { topic: "RibbitChat", posts: "784" },
+  { topic: "PondLife", posts: "2.4k posts", description: "Life by the pond" },
+  { topic: "FrogMeet2024", posts: "1.8k posts", description: "Annual amphibian gathering" },
+  { topic: "LilyPadTips", posts: "956 posts", description: "Best practices for pad living" },
+  { topic: "RibbitChat", posts: "784 posts", description: "Voice chat revolution" },
+  { topic: "WebDev", posts: "1.2k posts", description: "Tech updates from the pond" },
 ];
 
 const Index = () => {

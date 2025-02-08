@@ -8,18 +8,26 @@ const mockChats = [
   {
     id: 1,
     user: "Hoppy",
-    lastMessage: "Ready for tonight's pond gathering?",
+    lastMessage: "Just saw your latest project, looks amazing! 🐸",
     time: "2h ago",
-    avatar: "/placeholder.svg",
+    avatar: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=64&h=64&fit=crop&crop=faces",
     unread: 2,
   },
   {
     id: 2,
     user: "TadpoleTom",
-    lastMessage: "The water is perfect today!",
+    lastMessage: "When are we meeting for the hackathon?",
     time: "5h ago",
-    avatar: "/placeholder.svg",
+    avatar: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=64&h=64&fit=crop&crop=faces",
     unread: 0,
+  },
+  {
+    id: 3,
+    user: "WebDev Wizard",
+    lastMessage: "Check out this new UI framework!",
+    time: "1d ago",
+    avatar: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=64&h=64&fit=crop&crop=faces",
+    unread: 1,
   },
 ];
 
