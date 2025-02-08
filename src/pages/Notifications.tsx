@@ -1,6 +1,7 @@
 
 import { Sidebar } from "@/components/Sidebar";
 import { Bell, Settings } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockNotifications = [
   {
@@ -30,11 +31,13 @@ const mockNotifications = [
 ];
 
 const Notifications = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-64 p-6">
-        <div className="max-w-2xl mx-auto">
+      <main className={`${isMobile ? 'ml-0' : 'ml-20'} transition-all duration-300`}>
+        <div className="max-w-2xl mx-auto p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">Notifications</h1>
             <button className="p-2 hover:bg-background-secondary rounded-full transition-colors">

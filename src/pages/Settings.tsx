@@ -3,13 +3,16 @@ import { Sidebar } from "@/components/Sidebar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Settings = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-64 p-6">
-        <div className="max-w-2xl mx-auto">
+      <main className={`${isMobile ? 'ml-0' : 'ml-20'} transition-all duration-300`}>
+        <div className="max-w-2xl mx-auto p-6">
           <h1 className="text-2xl font-bold mb-6">Settings</h1>
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow-sm">
