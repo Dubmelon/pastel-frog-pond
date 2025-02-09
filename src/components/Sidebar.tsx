@@ -1,10 +1,10 @@
 
-import { Home, Bell, Mail, Settings, User, Menu } from "lucide-react";
+import { LayoutDashboard, Bell, Mail, Settings, User, Menu } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Bell, label: "Notifications", path: "/notifications" },
   { icon: Mail, label: "Messages", path: "/messages" },
   { icon: User, label: "Profile", path: "/profile" },
