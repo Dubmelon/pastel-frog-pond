@@ -23,8 +23,8 @@ export const Sidebar = () => {
           <div className="flex flex-col h-full p-4">
             <Link to="/" className="mb-8 flex items-center justify-center">
               <img
-                src="/lovable-uploads/b91a5d97-e32a-46cf-a2f2-4cbc6b082417.png"
-                alt="Logo"
+                src="/lovable-uploads/05eb46c8-beec-4402-aa5b-1debbe9d35c0.png"
+                alt="Cute frog logo"
                 className="w-10 h-10 transition-all duration-300 hover:scale-105"
               />
             </Link>
