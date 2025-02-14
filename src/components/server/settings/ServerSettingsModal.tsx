@@ -14,6 +14,7 @@ import { ServerMembersSettings } from "./tabs/ServerMembersSettings";
 import { ServerInviteSettings } from "./tabs/ServerInviteSettings";
 import { Server } from "@/types/server";
 import { supabase } from "@/integrations/supabase/client";
+import { transformServerMetadata } from "@/utils/server-transforms";
 
 interface ServerSettingsModalProps {
   serverId: string;
@@ -44,7 +45,18 @@ export const ServerSettingsModal = ({
         return;
       }
 
-      setServer(data);
+      // Transform the raw server data into our Server type
+      const transformedServer: Server = {
+        id: data.id,
+        name: data.name,
+        icon_url: data.icon_url,
+        owner_id: data.owner_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        metadata: transformServerMetadata(data.metadata)
+      };
+
+      setServer(transformedServer);
     };
 
     fetchServer();
@@ -62,7 +74,18 @@ export const ServerSettingsModal = ({
         },
         (payload) => {
           if (payload.eventType === 'UPDATE') {
-            setServer(payload.new as Server);
+            const newData = payload.new as any;
+            // Transform the updated data before setting it in state
+            const updatedServer: Server = {
+              id: newData.id,
+              name: newData.name,
+              icon_url: newData.icon_url,
+              owner_id: newData.owner_id,
+              created_at: newData.created_at,
+              updated_at: newData.updated_at,
+              metadata: transformServerMetadata(newData.metadata)
+            };
+            setServer(updatedServer);
           }
         }
       )
