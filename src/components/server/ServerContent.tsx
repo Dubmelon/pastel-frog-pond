@@ -45,7 +45,7 @@ const WelcomeMessage = () => {
             key={card.title}
             className="p-4 rounded-lg bg-background hover:bg-background-secondary transition-colors cursor-pointer"
           >
-            <card.icon className="w-8 h-8 text-primary mb-3" />
+            <div className="w-8 h-8 text-primary mb-3">{card.icon}</div>
             <h3 className="font-medium mb-2">{card.title}</h3>
             <p className="text-sm text-text-secondary">{card.description}</p>
           </div>
@@ -57,22 +57,22 @@ const WelcomeMessage = () => {
 
 const welcomeCards = [
   {
-    icon: () => "👋",
+    icon: "👋",
     title: "Say Hello",
     description: "Break the ice and introduce yourself to the community",
   },
   {
-    icon: () => "🎨",
+    icon: "🎨",
     title: "Customize Your Profile",
     description: "Make your profile unique with a custom avatar and status",
   },
   {
-    icon: () => "🤝",
+    icon: "🤝",
     title: "Invite Friends",
     description: "Share this server with your friends and grow the community",
   },
   {
-    icon: () => "📝",
+    icon: "📝",
     title: "Server Rules",
     description: "Check out our community guidelines to keep things friendly",
   },
