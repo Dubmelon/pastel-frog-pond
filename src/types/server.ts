@@ -1,4 +1,3 @@
-
 import { LucideIcon } from "lucide-react";
 
 export type UserStatus = "ONLINE" | "IDLE" | "DND" | "OFFLINE";
@@ -29,6 +28,7 @@ export interface Category {
   position: number;
   channels: Channel[];
   isExpanded?: boolean;
+  collapsed?: boolean;
 }
 
 export interface Channel {
@@ -43,7 +43,7 @@ export interface Channel {
     slowmode: number;
     nsfw: boolean;
     require_verification: boolean;
-  };
+  } | null;
   created_at: string;
   updated_at: string;
   unreadCount?: number;
@@ -167,4 +167,3 @@ export interface Invite {
   created_at: string;
   uses: number;
 }
-

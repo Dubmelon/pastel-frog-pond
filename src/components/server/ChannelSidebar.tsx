@@ -1,4 +1,3 @@
-
 import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -37,7 +36,6 @@ export const ChannelSidebar = ({
     })
   );
 
-  // Load categories and their collapsed state from localStorage
   useEffect(() => {
     if (!serverId) return;
 
@@ -53,7 +51,6 @@ export const ChannelSidebar = ({
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        // Fetch categories with their channels
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select(`
@@ -86,8 +83,11 @@ export const ChannelSidebar = ({
           channels: (cat.channels || [])
             .map(channel => ({
               ...channel,
-              server_id: serverId,
-              category_id: cat.id
+              settings: channel.settings || {
+                slowmode: 0,
+                nsfw: false,
+                require_verification: false
+              }
             }))
             .sort((a, b) => a.position - b.position)
         }));
@@ -115,7 +115,7 @@ export const ChannelSidebar = ({
           filter: `server_id=eq.${serverId}`
         },
         () => {
-          fetchData(); // Refresh data on any changes
+          fetchData();
         }
       )
       .on(
@@ -127,7 +127,7 @@ export const ChannelSidebar = ({
           filter: `server_id=eq.${serverId}`
         },
         () => {
-          fetchData(); // Refresh data on any channel changes
+          fetchData();
         }
       )
       .subscribe();
