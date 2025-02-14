@@ -10,6 +10,9 @@ import { UserSettings } from "./UserSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CreateChannelModal } from "./modals/CreateChannelModal";
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableChannel } from "./SortableChannel";
 
 interface ChannelSidebarProps {
   serverId: string | null;
@@ -25,6 +28,14 @@ export const ChannelSidebar = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Load categories and their collapsed state from localStorage
   useEffect(() => {
@@ -59,7 +70,9 @@ export const ChannelSidebar = ({
               topic,
               settings,
               created_at,
-              updated_at
+              updated_at,
+              server_id,
+              category_id
             )
           `)
           .eq('server_id', serverId)
@@ -70,7 +83,13 @@ export const ChannelSidebar = ({
         // Transform and sort the data
         const transformedCategories = (categoriesData || []).map(cat => ({
           ...cat,
-          channels: (cat.channels || []).sort((a, b) => a.position - b.position)
+          channels: (cat.channels || [])
+            .map(channel => ({
+              ...channel,
+              server_id: serverId,
+              category_id: cat.id
+            }))
+            .sort((a, b) => a.position - b.position)
         }));
 
         setCategories(loadCollapsedState(transformedCategories));
@@ -117,6 +136,58 @@ export const ChannelSidebar = ({
       supabase.removeChannel(channel);
     };
   }, [serverId]);
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const activeChannel = active.id as string;
+    const overChannel = over.id as string;
+
+    const activeCategory = categories.find(cat => 
+      cat.channels.some(ch => ch.id === activeChannel)
+    );
+    const overCategory = categories.find(cat => 
+      cat.channels.some(ch => ch.id === overChannel)
+    );
+
+    if (!activeCategory || !overCategory) return;
+
+    const oldIndex = activeCategory.channels.findIndex(ch => ch.id === activeChannel);
+    const newIndex = overCategory.channels.findIndex(ch => ch.id === overChannel);
+
+    // Update positions locally first (optimistic update)
+    setCategories(prevCategories => {
+      const newCategories = [...prevCategories];
+      const category = newCategories.find(c => c.id === activeCategory.id);
+      if (!category) return prevCategories;
+
+      const channels = [...category.channels];
+      const [movedChannel] = channels.splice(oldIndex, 1);
+      channels.splice(newIndex, 0, movedChannel);
+
+      // Update positions
+      channels.forEach((ch, index) => {
+        ch.position = index;
+      });
+
+      category.channels = channels;
+      return newCategories;
+    });
+
+    // Update position in the database
+    try {
+      const { error } = await supabase
+        .from('channels')
+        .update({ position: newIndex })
+        .eq('id', activeChannel);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating channel position:', error);
+      toast.error('Failed to update channel position');
+    }
+  };
 
   const toggleCategory = async (categoryId: string) => {
     setCategories(prevCategories =>
@@ -186,7 +257,6 @@ export const ChannelSidebar = ({
             <SheetHeader>
               <SheetTitle>Server Members</SheetTitle>
             </SheetHeader>
-            {/* Member list will be implemented in the next phase */}
             <div className="mt-4">
               <div className="text-sm text-text-secondary">
                 Member list coming soon...
@@ -225,38 +295,27 @@ export const ChannelSidebar = ({
               </button>
               
               {category.isExpanded && (
-                <div className="space-y-0.5">
-                  {category.channels.map((channel) => (
-                    <button
-                      key={channel.id}
-                      onClick={() => onChannelSelect(channel.id)}
-                      className={cn(
-                        "w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-background/50 group",
-                        activeChannelId === channel.id && "bg-background/50 text-text"
-                      )}
-                    >
-                      {channel.type === "TEXT" ? (
-                        <Hash className="w-4 h-4 text-text-secondary" />
-                      ) : (
-                        <Speaker className="w-4 h-4 text-text-secondary" />
-                      )}
-                      <span className="flex-1 truncate text-sm">{channel.name}</span>
-                      {channel.type === "VOICE" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100"
-                        >
-                          <Mic className="w-4 h-4 text-text-secondary hover:text-text" />
-                        </Button>
-                      )}
-                      <Settings 
-                        className="w-4 h-4 opacity-0 group-hover:opacity-100 text-text-secondary hover:text-text"
-                        onClick={(e) => handleChannelSettings(e, channel)}
-                      />
-                    </button>
-                  ))}
-                </div>
+                <DndContext 
+                  sensors={sensors}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext 
+                    items={category.channels.map(ch => ch.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-0.5">
+                      {category.channels.map((channel) => (
+                        <SortableChannel
+                          key={channel.id}
+                          channel={channel}
+                          isActive={channel.id === activeChannelId}
+                          onSelect={onChannelSelect}
+                          onSettingsClick={handleChannelSettings}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
           ))}
