@@ -24,6 +24,12 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
       const { data, error } = await supabase
         .from('servers')
         .select('*')
+        .in('id', (
+          supabase
+            .from('server_members')
+            .select('server_id')
+            .eq('user_id', user.id)
+        ))
         .order('created_at');
 
       if (error) {
@@ -46,9 +52,22 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
           schema: 'public',
           table: 'servers'
         },
-        (payload) => {
+        async (payload) => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
           if (payload.eventType === 'INSERT') {
-            setServers(current => [...current, payload.new as Server]);
+            // Check if the user is a member of this server
+            const { data: membership } = await supabase
+              .from('server_members')
+              .select('*')
+              .eq('server_id', payload.new.id)
+              .eq('user_id', user.id)
+              .single();
+
+            if (membership) {
+              setServers(current => [...current, payload.new as Server]);
+            }
           } else if (payload.eventType === 'DELETE') {
             setServers(current => current.filter(server => server.id !== payload.old.id));
           } else if (payload.eventType === 'UPDATE') {
