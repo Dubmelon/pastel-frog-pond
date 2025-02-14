@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Server } from "@/types/server";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Shield, ShieldCheck, BadgeCheck } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ServerGeneralSettingsProps {
   server: Server;
@@ -15,19 +15,28 @@ interface ServerGeneralSettingsProps {
 export const ServerGeneralSettings = ({ server }: ServerGeneralSettingsProps) => {
   const [name, setName] = useState(server.name);
   const [isUploading, setIsUploading] = useState(false);
+  const [verificationLevel, setVerificationLevel] = useState(
+    server.metadata?.verification_level ?? 0
+  );
 
   const handleUpdateServer = async () => {
     const { error } = await supabase
       .from('servers')
-      .update({ name })
+      .update({
+        name,
+        metadata: {
+          ...server.metadata,
+          verification_level: verificationLevel
+        }
+      })
       .eq('id', server.id);
 
     if (error) {
-      toast.error("Failed to update server name");
+      toast.error("Failed to update server settings");
       return;
     }
 
-    toast.success("Server name updated");
+    toast.success("Server settings updated");
   };
 
   const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +91,27 @@ export const ServerGeneralSettings = ({ server }: ServerGeneralSettingsProps) =>
       toast.error("Failed to remove server icon");
     }
   };
+
+  const verificationLevels = [
+    {
+      value: 0,
+      label: "None",
+      description: "No verification required",
+      icon: Shield
+    },
+    {
+      value: 1,
+      label: "Low",
+      description: "Must have verified email",
+      icon: ShieldCheck
+    },
+    {
+      value: 2,
+      label: "High",
+      description: "Must be a member for 10 minutes",
+      icon: BadgeCheck
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -153,9 +183,39 @@ export const ServerGeneralSettings = ({ server }: ServerGeneralSettingsProps) =>
           />
         </div>
 
+        <div className="space-y-2">
+          <Label>Verification Level</Label>
+          <RadioGroup
+            value={verificationLevel.toString()}
+            onValueChange={(value) => setVerificationLevel(parseInt(value))}
+            className="space-y-2"
+          >
+            {verificationLevels.map((level) => (
+              <div
+                key={level.value}
+                className="flex items-center space-x-3 space-y-0"
+              >
+                <RadioGroupItem value={level.value.toString()} id={`level-${level.value}`} />
+                <div className="flex flex-1 items-center space-x-3">
+                  <level.icon className="w-5 h-5 text-text-secondary" />
+                  <Label
+                    htmlFor={`level-${level.value}`}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="font-medium">{level.label}</div>
+                    <div className="text-sm text-text-secondary">
+                      {level.description}
+                    </div>
+                  </Label>
+                </div>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+
         <Button
           onClick={handleUpdateServer}
-          disabled={name === server.name || name.length < 1}
+          disabled={name === server.name && verificationLevel === server.metadata?.verification_level}
         >
           Save Changes
         </Button>

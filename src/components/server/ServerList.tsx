@@ -16,7 +16,6 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch initial servers
     const fetchServers = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -31,7 +30,35 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
         return;
       }
 
-      setServers(data || []);
+      // Transform the data to match the Server type
+      const transformedServers: Server[] = (data || []).map(server => ({
+        ...server,
+        metadata: server.metadata ? {
+          boost_status: server.metadata.boost_status,
+          verification_level: server.metadata.verification_level ?? 0,
+          features: {
+            community: server.metadata.features?.community ?? false,
+            welcome_screen: {
+              enabled: server.metadata.features?.welcome_screen?.enabled ?? false,
+              description: server.metadata.features?.welcome_screen?.description ?? null,
+              welcome_channels: server.metadata.features?.welcome_screen?.welcome_channels ?? []
+            }
+          }
+        } : {
+          boost_status: null,
+          verification_level: 0,
+          features: {
+            community: false,
+            welcome_screen: {
+              enabled: false,
+              description: null,
+              welcome_channels: []
+            }
+          }
+        }
+      }));
+
+      setServers(transformedServers);
     };
 
     fetchServers();
