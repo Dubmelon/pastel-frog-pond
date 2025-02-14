@@ -5,6 +5,7 @@ import { Category, Channel } from "@/types/server";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { UserSettings } from "./UserSettings";
 
 interface ChannelSidebarProps {
   serverId: string | null;
@@ -220,7 +221,7 @@ export const ChannelSidebar = ({
             <div className="text-sm font-medium truncate">FroggyUser</div>
             <div className="text-xs text-text-secondary truncate">Online</div>
           </div>
-          <Settings className="w-4 h-4 text-text-secondary hover:text-text cursor-pointer" />
+          <UserSettings />
         </div>
       </div>
     </div>
