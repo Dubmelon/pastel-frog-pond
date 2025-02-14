@@ -1,5 +1,4 @@
-
-import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic, HeadphonesOff } from "lucide-react";
+import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic, HeadphoneOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Category, Channel } from "@/types/server";
@@ -188,7 +187,7 @@ export const ChannelSidebar = ({
                           className="opacity-0 group-hover:opacity-100"
                         >
                           {channel.isActive ? (
-                            <HeadphonesOff className="w-4 h-4 text-text-secondary hover:text-text" />
+                            <HeadphoneOff className="w-4 h-4 text-text-secondary hover:text-text" />
                           ) : (
                             <Mic className="w-4 h-4 text-text-secondary hover:text-text" />
                           )}
