@@ -38,6 +38,90 @@ export type Database = {
           },
         ]
       }
+      channel_member_states: {
+        Row: {
+          channel_id: string | null
+          created_at: string | null
+          id: string
+          last_read_at: string | null
+          mention_count: number | null
+          muted: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_read_at?: string | null
+          mention_count?: number | null
+          muted?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_read_at?: string | null
+          mention_count?: number | null
+          muted?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_member_states_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_member_states_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_role_permissions: {
+        Row: {
+          channel_id: string | null
+          created_at: string | null
+          id: string
+          permissions: Json
+          role_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          permissions?: Json
+          role_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          permissions?: Json
+          role_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_role_permissions_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           category_id: string | null
@@ -46,6 +130,7 @@ export type Database = {
           name: string
           position: number
           server_id: string | null
+          settings: Json | null
           topic: string | null
           type: Database["public"]["Enums"]["channel_type"]
           updated_at: string | null
@@ -57,6 +142,7 @@ export type Database = {
           name: string
           position?: number
           server_id?: string | null
+          settings?: Json | null
           topic?: string | null
           type?: Database["public"]["Enums"]["channel_type"]
           updated_at?: string | null
@@ -68,6 +154,7 @@ export type Database = {
           name?: string
           position?: number
           server_id?: string | null
+          settings?: Json | null
           topic?: string | null
           type?: Database["public"]["Enums"]["channel_type"]
           updated_at?: string | null
@@ -160,6 +247,35 @@ export type Database = {
           },
         ]
       }
+      message_edits: {
+        Row: {
+          content: string
+          edited_at: string | null
+          id: string
+          message_id: string | null
+        }
+        Insert: {
+          content: string
+          edited_at?: string | null
+          id?: string
+          message_id?: string | null
+        }
+        Update: {
+          content?: string
+          edited_at?: string | null
+          id?: string
+          message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_edits_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           attachments: Json | null
@@ -169,6 +285,8 @@ export type Database = {
           created_at: string | null
           edited_at: string | null
           id: string
+          reply_count: number | null
+          thread_id: string | null
         }
         Insert: {
           attachments?: Json | null
@@ -178,6 +296,8 @@ export type Database = {
           created_at?: string | null
           edited_at?: string | null
           id?: string
+          reply_count?: number | null
+          thread_id?: string | null
         }
         Update: {
           attachments?: Json | null
@@ -187,6 +307,8 @@ export type Database = {
           created_at?: string | null
           edited_at?: string | null
           id?: string
+          reply_count?: number | null
+          thread_id?: string | null
         }
         Relationships: [
           {
@@ -194,6 +316,13 @@ export type Database = {
             columns: ["channel_id"]
             isOneToOne: false
             referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
@@ -204,27 +333,33 @@ export type Database = {
           created_at: string | null
           custom_status: string | null
           id: string
+          notification_preferences: Json | null
           status: Database["public"]["Enums"]["user_status"] | null
           updated_at: string | null
           username: string
+          voice_settings: Json | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
           custom_status?: string | null
           id: string
+          notification_preferences?: Json | null
           status?: Database["public"]["Enums"]["user_status"] | null
           updated_at?: string | null
           username: string
+          voice_settings?: Json | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
           custom_status?: string | null
           id?: string
+          notification_preferences?: Json | null
           status?: Database["public"]["Enums"]["user_status"] | null
           updated_at?: string | null
           username?: string
+          voice_settings?: Json | null
         }
         Relationships: []
       }
