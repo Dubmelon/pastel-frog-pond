@@ -1,5 +1,6 @@
 
 import { UserAvatar } from "./UserAvatar";
+import { Hash, Users, Pin, Bell } from "lucide-react";
 
 interface ServerContentProps {
   serverId: string | null;
@@ -17,9 +18,16 @@ export const ServerContent = ({ serverId, channelId }: ServerContentProps) => {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="h-12 px-4 flex items-center gap-2 border-b border-border">
-        <span className="text-text-secondary">#</span>
-        <h3 className="font-semibold">general</h3>
+      <div className="h-12 px-4 flex items-center justify-between border-b border-border">
+        <div className="flex items-center gap-2">
+          <span className="text-text-secondary"><Hash className="w-5 h-5" /></span>
+          <h3 className="font-semibold">general</h3>
+        </div>
+        <div className="flex items-center gap-4">
+          <Bell className="w-5 h-5 text-text-secondary hover:text-text cursor-pointer" />
+          <Pin className="w-5 h-5 text-text-secondary hover:text-text cursor-pointer" />
+          <Users className="w-5 h-5 text-text-secondary hover:text-text cursor-pointer" />
+        </div>
       </div>
 
       <div className="flex-1 p-4">
