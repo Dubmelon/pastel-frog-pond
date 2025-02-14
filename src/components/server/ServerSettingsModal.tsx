@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
@@ -7,12 +8,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ServerGeneralSettings } from "./tabs/ServerGeneralSettings";
-import { ServerRolesSettings } from "./tabs/ServerRolesSettings";
-import { ServerMembersSettings } from "./tabs/ServerMembersSettings";
-import { ServerInviteSettings } from "./tabs/ServerInviteSettings";
-import { Server } from "@/types/server";
+import { ServerGeneralSettings } from "@/components/server/settings/tabs/ServerGeneralSettings";
+import { ServerRolesSettings } from "@/components/server/settings/tabs/ServerRolesSettings";
+import { ServerMembersSettings } from "@/components/server/settings/tabs/ServerMembersSettings";
+import { ServerInviteSettings } from "@/components/server/settings/tabs/ServerInviteSettings";
+import { Server, ServerMetadata } from "@/types/server";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 interface ServerSettingsModalProps {
   serverId: string;
@@ -43,32 +45,25 @@ export const ServerSettingsModal = ({
         return;
       }
 
-      // Transform the data to match the Server type
+      const transformServerMetadata = (metadata: Json): ServerMetadata => {
+        const meta = metadata as Record<string, any>;
+        return {
+          boost_status: meta?.boost_status ?? null,
+          verification_level: meta?.verification_level ?? 0,
+          features: {
+            community: meta?.features?.community ?? false,
+            welcome_screen: {
+              enabled: meta?.features?.welcome_screen?.enabled ?? false,
+              description: meta?.features?.welcome_screen?.description ?? null,
+              welcome_channels: meta?.features?.welcome_screen?.welcome_channels ?? []
+            }
+          }
+        };
+      };
+
       const transformedServer: Server = {
         ...data,
-        metadata: data.metadata ? {
-          boost_status: data.metadata.boost_status,
-          verification_level: data.metadata.verification_level ?? 0,
-          features: {
-            community: data.metadata.features?.community ?? false,
-            welcome_screen: {
-              enabled: data.metadata.features?.welcome_screen?.enabled ?? false,
-              description: data.metadata.features?.welcome_screen?.description ?? null,
-              welcome_channels: data.metadata.features?.welcome_screen?.welcome_channels ?? []
-            }
-          }
-        } : {
-          boost_status: null,
-          verification_level: 0,
-          features: {
-            community: false,
-            welcome_screen: {
-              enabled: false,
-              description: null,
-              welcome_channels: []
-            }
-          }
-        }
+        metadata: transformServerMetadata(data.metadata)
       };
 
       setServer(transformedServer);
@@ -89,7 +84,11 @@ export const ServerSettingsModal = ({
         },
         (payload) => {
           if (payload.eventType === 'UPDATE') {
-            setServer(payload.new as Server);
+            const newData = payload.new as any;
+            setServer({
+              ...newData,
+              metadata: transformServerMetadata(newData.metadata)
+            });
           }
         }
       )

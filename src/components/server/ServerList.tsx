@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Server, ServerMetadata } from "@/types/server";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateServerModal } from "./CreateServerModal";
+import { Json } from "@/integrations/supabase/types";
 
 interface ServerListProps {
   activeServerId: string | null;
@@ -30,21 +31,25 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
         return;
       }
 
-      // Transform the data to match the Server type
-      const transformedServers: Server[] = (data || []).map(server => ({
-        ...server,
-        metadata: {
-          boost_status: server.metadata?.boost_status ?? null,
-          verification_level: server.metadata?.verification_level ?? 0,
+      const transformServerMetadata = (metadata: Json): ServerMetadata => {
+        const meta = metadata as Record<string, any>;
+        return {
+          boost_status: meta?.boost_status ?? null,
+          verification_level: meta?.verification_level ?? 0,
           features: {
-            community: server.metadata?.features?.community ?? false,
+            community: meta?.features?.community ?? false,
             welcome_screen: {
-              enabled: server.metadata?.features?.welcome_screen?.enabled ?? false,
-              description: server.metadata?.features?.welcome_screen?.description ?? null,
-              welcome_channels: server.metadata?.features?.welcome_screen?.welcome_channels ?? []
+              enabled: meta?.features?.welcome_screen?.enabled ?? false,
+              description: meta?.features?.welcome_screen?.description ?? null,
+              welcome_channels: meta?.features?.welcome_screen?.welcome_channels ?? []
             }
           }
-        }
+        };
+      };
+
+      const transformedServers: Server[] = (data || []).map(server => ({
+        ...server,
+        metadata: transformServerMetadata(server.metadata)
       }));
 
       setServers(transformedServers);
@@ -67,18 +72,7 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
             const newServer = payload.new as any;
             setServers(current => [...current, {
               ...newServer,
-              metadata: {
-                boost_status: newServer.metadata?.boost_status ?? null,
-                verification_level: newServer.metadata?.verification_level ?? 0,
-                features: {
-                  community: newServer.metadata?.features?.community ?? false,
-                  welcome_screen: {
-                    enabled: newServer.metadata?.features?.welcome_screen?.enabled ?? false,
-                    description: newServer.metadata?.features?.welcome_screen?.description ?? null,
-                    welcome_channels: newServer.metadata?.features?.welcome_screen?.welcome_channels ?? []
-                  }
-                }
-              }
+              metadata: transformServerMetadata(newServer.metadata)
             }]);
           } else if (payload.eventType === 'DELETE') {
             setServers(current => current.filter(server => server.id !== payload.old.id));
@@ -88,18 +82,7 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
               current.map(server => 
                 server.id === updatedServer.id ? {
                   ...updatedServer,
-                  metadata: {
-                    boost_status: updatedServer.metadata?.boost_status ?? null,
-                    verification_level: updatedServer.metadata?.verification_level ?? 0,
-                    features: {
-                      community: updatedServer.metadata?.features?.community ?? false,
-                      welcome_screen: {
-                        enabled: updatedServer.metadata?.features?.welcome_screen?.enabled ?? false,
-                        description: updatedServer.metadata?.features?.welcome_screen?.description ?? null,
-                        welcome_channels: updatedServer.metadata?.features?.welcome_screen?.welcome_channels ?? []
-                      }
-                    }
-                  }
+                  metadata: transformServerMetadata(updatedServer.metadata)
                 } : server
               )
             );
