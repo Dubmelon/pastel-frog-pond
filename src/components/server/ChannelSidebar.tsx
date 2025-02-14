@@ -1,11 +1,14 @@
+
 import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic, HeadphoneOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Category, Channel, ChannelType } from "@/types/server";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { UserSettings } from "./UserSettings";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ChannelSidebarProps {
   serverId: string | null;
@@ -13,137 +16,107 @@ interface ChannelSidebarProps {
   onChannelSelect: (channelId: string) => void;
 }
 
-// Mock data - in real app would come from API
-const initialCategories: Category[] = [
-  {
-    id: "1",
-    server_id: "mock-server-1",
-    name: "TEXT CHANNELS",
-    position: 0,
-    channels: [
-      { 
-        id: "1", 
-        server_id: "mock-server-1",
-        category_id: "1", 
-        name: "general", 
-        type: "TEXT" as ChannelType, 
-        position: 0,
-        topic: null,
-        settings: {
-          slowmode: 0,
-          nsfw: false,
-          require_verification: false
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        unreadCount: 2 
-      },
-      { 
-        id: "2", 
-        server_id: "mock-server-1",
-        category_id: "1", 
-        name: "memes", 
-        type: "TEXT" as ChannelType, 
-        position: 1,
-        topic: null,
-        settings: {
-          slowmode: 0,
-          nsfw: false,
-          require_verification: false
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      { 
-        id: "3", 
-        server_id: "mock-server-1",
-        category_id: "1", 
-        name: "announcements", 
-        type: "TEXT" as ChannelType, 
-        position: 2,
-        topic: null,
-        settings: {
-          slowmode: 0,
-          nsfw: false,
-          require_verification: false
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-    ],
-    isExpanded: true,
-  },
-  {
-    id: "2",
-    server_id: "mock-server-1",
-    name: "VOICE CHANNELS",
-    position: 1,
-    channels: [
-      { 
-        id: "4", 
-        server_id: "mock-server-1",
-        category_id: "2", 
-        name: "Pond Chat", 
-        type: "VOICE" as ChannelType, 
-        position: 0,
-        topic: null,
-        settings: {
-          slowmode: 0,
-          nsfw: false,
-          require_verification: false
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        isActive: true 
-      },
-      { 
-        id: "5", 
-        server_id: "mock-server-1",
-        category_id: "2", 
-        name: "Music", 
-        type: "VOICE" as ChannelType, 
-        position: 1,
-        topic: null,
-        settings: {
-          slowmode: 0,
-          nsfw: false,
-          require_verification: false
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      { 
-        id: "6", 
-        server_id: "mock-server-1",
-        category_id: "2", 
-        name: "Gaming", 
-        type: "VOICE" as ChannelType, 
-        position: 2,
-        topic: null,
-        settings: {
-          slowmode: 0,
-          nsfw: false,
-          require_verification: false
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-    ],
-    isExpanded: true,
-  },
-];
-
 export const ChannelSidebar = ({
   serverId,
   activeChannelId,
   onChannelSelect,
 }: ChannelSidebarProps) => {
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
-  const [isInVoice, setIsInVoice] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!serverId) return null;
+  // Load categories and their collapsed state from localStorage
+  useEffect(() => {
+    if (!serverId) return;
 
-  const toggleCategory = (categoryId: string) => {
+    const loadCollapsedState = (cats: Category[]) => {
+      const collapsedState = localStorage.getItem(`${serverId}-collapsed-categories`);
+      const collapsed = collapsedState ? JSON.parse(collapsedState) : {};
+      return cats.map(cat => ({
+        ...cat,
+        isExpanded: !collapsed[cat.id]
+      }));
+    };
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch categories with their channels
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('categories')
+          .select(`
+            id,
+            name,
+            position,
+            collapsed,
+            channels (
+              id,
+              name,
+              type,
+              position,
+              topic,
+              settings,
+              created_at,
+              updated_at
+            )
+          `)
+          .eq('server_id', serverId)
+          .order('position');
+
+        if (categoriesError) throw categoriesError;
+
+        // Transform and sort the data
+        const transformedCategories = categoriesData.map(cat => ({
+          ...cat,
+          channels: cat.channels.sort((a, b) => a.position - b.position)
+        }));
+
+        setCategories(loadCollapsedState(transformedCategories));
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+        setError('Failed to load channels');
+        toast.error('Failed to load channels');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Subscribe to changes
+    const channel = supabase.channel('categories-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categories',
+          filter: `server_id=eq.${serverId}`
+        },
+        (payload) => {
+          fetchData(); // Refresh data on any changes
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'channels',
+          filter: `server_id=eq.${serverId}`
+        },
+        (payload) => {
+          fetchData(); // Refresh data on any channel changes
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [serverId]);
+
+  const toggleCategory = async (categoryId: string) => {
     setCategories(prevCategories =>
       prevCategories.map(category =>
         category.id === categoryId
@@ -151,23 +124,56 @@ export const ChannelSidebar = ({
           : category
       )
     );
+
+    // Save collapsed state to localStorage
+    const collapsedState = categories.reduce((acc, cat) => ({
+      ...acc,
+      [cat.id]: !cat.isExpanded
+    }), {});
+    localStorage.setItem(`${serverId}-collapsed-categories`, JSON.stringify(collapsedState));
+
+    // Update in database
+    if (serverId) {
+      const { error } = await supabase
+        .from('categories')
+        .update({ collapsed: !categories.find(c => c.id === categoryId)?.isExpanded })
+        .eq('id', categoryId);
+
+      if (error) {
+        console.error('Error updating category:', error);
+        toast.error('Failed to update category state');
+      }
+    }
   };
 
   const handleChannelSettings = (e: React.MouseEvent, channel: Channel) => {
     e.stopPropagation();
-    // In a real app, this would open a channel settings modal
+    // TODO: Implement channel settings modal
     console.log("Open channel settings for:", channel.name);
   };
 
-  const handleVoiceJoin = (e: React.MouseEvent, channel: Channel) => {
-    e.stopPropagation();
-    setIsInVoice(!isInVoice);
-  };
+  if (!serverId) return null;
+
+  if (isLoading) {
+    return (
+      <div className="w-60 h-full bg-background-secondary flex items-center justify-center">
+        <div className="text-text-secondary">Loading channels...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-60 h-full bg-background-secondary flex items-center justify-center">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-60 h-full bg-background-secondary flex flex-col border-r border-border">
       <div className="h-12 px-4 flex items-center justify-between border-b border-border">
-        <h2 className="font-semibold truncate">Froggy Server</h2>
+        <h2 className="font-semibold truncate">Server Name</h2>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -178,46 +184,12 @@ export const ChannelSidebar = ({
             <SheetHeader>
               <SheetTitle>Server Members</SheetTitle>
             </SheetHeader>
-            <ScrollArea className="mt-4 h-[calc(100vh-8rem)]">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold mb-2">Online — 3</h3>
-                  <div className="space-y-2">
-                    {Array.from({length: 3}).map((_, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 rounded-md hover:bg-background/50">
-                        <div className="relative">
-                          <img
-                            src="/lovable-uploads/05eb46c8-beec-4402-aa5b-1debbe9d35c0.png"
-                            alt="User avatar"
-                            className="w-8 h-8 rounded-full"
-                          />
-                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background-secondary" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">FroggyUser {i + 1}</div>
-                          <div className="text-xs text-text-secondary">Hopping around</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold mb-2">Offline — 2</h3>
-                  <div className="space-y-2">
-                    {Array.from({length: 2}).map((_, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 rounded-md hover:bg-background/50 opacity-50">
-                        <img
-                          src="/lovable-uploads/b91a5d97-e32a-46cf-a2f2-4cbc6b082417.png"
-                          alt="User avatar"
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <div className="text-sm font-medium">FroggyUser {i + 4}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {/* Member list will be implemented in the next phase */}
+            <div className="mt-4">
+              <div className="text-sm text-text-secondary">
+                Member list coming soon...
               </div>
-            </ScrollArea>
+            </div>
           </SheetContent>
         </Sheet>
       </div>
@@ -241,7 +213,7 @@ export const ChannelSidebar = ({
                   className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" 
                   onClick={(e) => {
                     e.stopPropagation();
-                    // In a real app, this would open create channel modal
+                    // TODO: Implement create channel modal
                     console.log("Create channel in category:", category.name);
                   }}
                 />
@@ -255,8 +227,7 @@ export const ChannelSidebar = ({
                       onClick={() => onChannelSelect(channel.id)}
                       className={cn(
                         "w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-background/50 group",
-                        activeChannelId === channel.id && "bg-background/50 text-text",
-                        channel.isActive && "bg-primary/10 text-primary"
+                        activeChannelId === channel.id && "bg-background/50 text-text"
                       )}
                     >
                       {channel.type === "TEXT" ? (
@@ -265,22 +236,14 @@ export const ChannelSidebar = ({
                         <Speaker className="w-4 h-4 text-text-secondary" />
                       )}
                       <span className="flex-1 truncate text-sm">{channel.name}</span>
-                      {channel.unreadCount && (
-                        <span className="px-1.5 py-0.5 text-xs bg-primary text-white rounded-full">
-                          {channel.unreadCount}
-                        </span>
-                      )}
                       {channel.type === "VOICE" && (
-                        <button
-                          onClick={(e) => handleVoiceJoin(e, channel)}
-                          className="opacity-0 group-hover:opacity-100"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100"
                         >
-                          {channel.isActive ? (
-                            <HeadphoneOff className="w-4 h-4 text-text-secondary hover:text-text" />
-                          ) : (
-                            <Mic className="w-4 h-4 text-text-secondary hover:text-text" />
-                          )}
-                        </button>
+                          <Mic className="w-4 h-4 text-text-secondary hover:text-text" />
+                        </Button>
                       )}
                       <Settings 
                         className="w-4 h-4 opacity-0 group-hover:opacity-100 text-text-secondary hover:text-text"

@@ -11,18 +11,21 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
+          collapsed: boolean | null
           id: string
           name: string
           position: number
           server_id: string | null
         }
         Insert: {
+          collapsed?: boolean | null
           id?: string
           name: string
           position?: number
           server_id?: string | null
         }
         Update: {
+          collapsed?: boolean | null
           id?: string
           name?: string
           position?: number
@@ -83,6 +86,45 @@ export type Database = {
           },
         ]
       }
+      channel_pins: {
+        Row: {
+          channel_id: string | null
+          id: string
+          message_id: string | null
+          pinned_at: string | null
+          pinned_by: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          id?: string
+          message_id?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          id?: string
+          message_id?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_pins_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_pins_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channel_role_permissions: {
         Row: {
           channel_id: string | null
@@ -129,11 +171,13 @@ export type Database = {
           id: string
           name: string
           position: number
+          region: string | null
           server_id: string | null
           settings: Json | null
           topic: string | null
           type: Database["public"]["Enums"]["channel_type"]
           updated_at: string | null
+          user_limit: number | null
         }
         Insert: {
           category_id?: string | null
@@ -141,11 +185,13 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          region?: string | null
           server_id?: string | null
           settings?: Json | null
           topic?: string | null
           type?: Database["public"]["Enums"]["channel_type"]
           updated_at?: string | null
+          user_limit?: number | null
         }
         Update: {
           category_id?: string | null
@@ -153,11 +199,13 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          region?: string | null
           server_id?: string | null
           settings?: Json | null
           topic?: string | null
           type?: Database["public"]["Enums"]["channel_type"]
           updated_at?: string | null
+          user_limit?: number | null
         }
         Relationships: [
           {
@@ -433,6 +481,38 @@ export type Database = {
           },
         ]
       }
+      server_boosts: {
+        Row: {
+          ends_at: string | null
+          id: string
+          server_id: string | null
+          started_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ends_at?: string | null
+          id?: string
+          server_id?: string | null
+          started_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ends_at?: string | null
+          id?: string
+          server_id?: string | null
+          started_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "server_boosts_server_id_fkey"
+            columns: ["server_id"]
+            isOneToOne: false
+            referencedRelation: "servers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       server_members: {
         Row: {
           id: string
@@ -471,27 +551,33 @@ export type Database = {
       servers: {
         Row: {
           created_at: string | null
+          features: Json | null
           icon_url: string | null
           id: string
           name: string
           owner_id: string | null
           updated_at: string | null
+          verification_level: number | null
         }
         Insert: {
           created_at?: string | null
+          features?: Json | null
           icon_url?: string | null
           id?: string
           name: string
           owner_id?: string | null
           updated_at?: string | null
+          verification_level?: number | null
         }
         Update: {
           created_at?: string | null
+          features?: Json | null
           icon_url?: string | null
           id?: string
           name?: string
           owner_id?: string | null
           updated_at?: string | null
+          verification_level?: number | null
         }
         Relationships: []
       }
