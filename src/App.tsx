@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Hopper from "./pages/Hopper";
 import Dashboard from "./pages/Dashboard";
+import { ServerLayout } from "./components/server/ServerLayout";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/servers/*" element={<ServerLayout />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
