@@ -50,17 +50,48 @@ export const ServerMembersSettings = ({ serverId }: ServerMembersSettingsProps) 
         return;
       }
 
-      // Combine the data
+      // Transform the data to match our expected types
       const combinedData = memberData.map(member => {
         const profile = profileData.find(p => p.id === member.user_id);
-        return {
-          member: {
-            ...member,
-            roles: member.roles as string[] || []
+        if (!profile) return null;
+
+        const transformedProfile: Profile = {
+          ...profile,
+          voice_settings: {
+            input_device: profile.voice_settings?.input_device || null,
+            output_device: profile.voice_settings?.output_device || null,
+            input_volume: profile.voice_settings?.input_volume || 100,
+            output_volume: profile.voice_settings?.output_volume || 100,
+            vad_sensitivity: profile.voice_settings?.vad_sensitivity || 50,
+            noise_suppression: profile.voice_settings?.noise_suppression ?? true,
+            echo_cancellation: profile.voice_settings?.echo_cancellation ?? true
           },
-          profile: profile!
+          notification_preferences: {
+            desktop_notifications: profile.notification_preferences?.desktop_notifications ?? true,
+            sound_notifications: profile.notification_preferences?.sound_notifications ?? true,
+            mention_notifications: profile.notification_preferences?.mention_notifications ?? true,
+            message_notifications: profile.notification_preferences?.message_notifications || "mentions",
+            custom_sounds: profile.notification_preferences?.custom_sounds || {}
+          },
+          status: profile.status || "OFFLINE",
+          custom_status: profile.custom_status || null,
+          avatar_url: profile.avatar_url || null,
+          created_at: profile.created_at || new Date().toISOString(),
+          updated_at: profile.updated_at || new Date().toISOString()
         };
-      });
+
+        const transformedMember: ServerMember = {
+          ...member,
+          roles: Array.isArray(member.roles) ? member.roles : [],
+          nickname: member.nickname || null,
+          joined_at: member.joined_at || new Date().toISOString()
+        };
+
+        return {
+          member: transformedMember,
+          profile: transformedProfile
+        };
+      }).filter((item): item is MemberWithProfile => item !== null);
 
       setMembers(combinedData);
     };
