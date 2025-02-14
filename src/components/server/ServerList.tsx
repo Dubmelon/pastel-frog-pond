@@ -1,11 +1,10 @@
-
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Server, ServerMetadata } from "@/types/server";
+import { Server } from "@/types/server";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateServerModal } from "./CreateServerModal";
-import { Json } from "@/integrations/supabase/types";
+import { transformServerMetadata } from "@/utils/server-transforms";
 
 interface ServerListProps {
   activeServerId: string | null;
@@ -30,22 +29,6 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
         console.error('Error fetching servers:', error);
         return;
       }
-
-      const transformServerMetadata = (metadata: Json): ServerMetadata => {
-        const meta = metadata as Record<string, any>;
-        return {
-          boost_status: meta?.boost_status ?? null,
-          verification_level: meta?.verification_level ?? 0,
-          features: {
-            community: meta?.features?.community ?? false,
-            welcome_screen: {
-              enabled: meta?.features?.welcome_screen?.enabled ?? false,
-              description: meta?.features?.welcome_screen?.description ?? null,
-              welcome_channels: meta?.features?.welcome_screen?.welcome_channels ?? []
-            }
-          }
-        };
-      };
 
       const transformedServers: Server[] = (data || []).map(server => ({
         ...server,
