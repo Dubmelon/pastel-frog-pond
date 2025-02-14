@@ -397,7 +397,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_server: {
+        Args: {
+          server_name: string
+          user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       channel_type: "TEXT" | "VOICE"
