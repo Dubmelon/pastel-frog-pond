@@ -1,4 +1,3 @@
-
 import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic, HeadphoneOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -30,6 +29,11 @@ const initialCategories: Category[] = [
         type: "TEXT" as ChannelType, 
         position: 0,
         topic: null,
+        settings: {
+          slowmode: 0,
+          nsfw: false,
+          require_verification: false
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         unreadCount: 2 
@@ -42,6 +46,11 @@ const initialCategories: Category[] = [
         type: "TEXT" as ChannelType, 
         position: 1,
         topic: null,
+        settings: {
+          slowmode: 0,
+          nsfw: false,
+          require_verification: false
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -53,6 +62,11 @@ const initialCategories: Category[] = [
         type: "TEXT" as ChannelType, 
         position: 2,
         topic: null,
+        settings: {
+          slowmode: 0,
+          nsfw: false,
+          require_verification: false
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -73,6 +87,11 @@ const initialCategories: Category[] = [
         type: "VOICE" as ChannelType, 
         position: 0,
         topic: null,
+        settings: {
+          slowmode: 0,
+          nsfw: false,
+          require_verification: false
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         isActive: true 
@@ -85,6 +104,11 @@ const initialCategories: Category[] = [
         type: "VOICE" as ChannelType, 
         position: 1,
         topic: null,
+        settings: {
+          slowmode: 0,
+          nsfw: false,
+          require_verification: false
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -96,6 +120,11 @@ const initialCategories: Category[] = [
         type: "VOICE" as ChannelType, 
         position: 2,
         topic: null,
+        settings: {
+          slowmode: 0,
+          nsfw: false,
+          require_verification: false
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       },
