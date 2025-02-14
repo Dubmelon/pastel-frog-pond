@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +17,7 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
   const [serverName, setServerName] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -33,6 +33,10 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
     }
   };
 
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!serverName.trim()) {
@@ -42,14 +46,12 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
 
     setIsLoading(true);
     try {
-      // Get the current user's ID
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
       if (!user) throw new Error("Not authenticated");
 
       let iconUrl = null;
 
-      // If we have an image, upload it first
       if (selectedImage) {
         const fileExt = selectedImage.name.split('.').pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
@@ -67,7 +69,6 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
         iconUrl = publicUrl;
       }
 
-      // Create server
       const { data: serverId, error: serverError } = await supabase.rpc(
         'create_server',
         { 
@@ -78,7 +79,6 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
 
       if (serverError) throw serverError;
 
-      // Update server with icon URL if we have one
       if (iconUrl) {
         const { error: updateError } = await supabase
           .from('servers')
@@ -118,7 +118,11 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
           <div className="space-y-2">
             <Label className="text-[#3A3935]">Server Icon</Label>
             <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full bg-[#F6F1EB] flex items-center justify-center overflow-hidden group">
+              <button
+                type="button"
+                onClick={triggerFileInput}
+                className="relative w-16 h-16 rounded-full bg-[#F6F1EB] flex items-center justify-center overflow-hidden group hover:bg-[#F0EBE5] transition-colors"
+              >
                 {imagePreview ? (
                   <img 
                     src={imagePreview} 
@@ -129,15 +133,16 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
                   <Upload className="w-6 h-6 text-[#828179]" />
                 )}
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   onChange={handleImageSelect}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="hidden"
                 />
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Upload className="w-6 h-6 text-white" />
                 </div>
-              </div>
+              </button>
               <div className="text-sm text-[#828179]">
                 <p>Recommended size: 128x128px</p>
                 <p>Max size: 5MB</p>
