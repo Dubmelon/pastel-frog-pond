@@ -12,8 +12,12 @@ interface PinnedMessagesProps {
   onClose: () => void;
 }
 
+type PinnedMessage = ChannelPin & {
+  message: Message;
+};
+
 export const PinnedMessages = ({ channelId, onClose }: PinnedMessagesProps) => {
-  const [pinnedMessages, setPinnedMessages] = useState<(ChannelPin & { message: Message })[]>([]);
+  const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
 
   useEffect(() => {
     const fetchPinnedMessages = async () => {
@@ -31,7 +35,7 @@ export const PinnedMessages = ({ channelId, onClose }: PinnedMessagesProps) => {
         return;
       }
 
-      setPinnedMessages(data);
+      setPinnedMessages(data as PinnedMessage[]);
     };
 
     fetchPinnedMessages();

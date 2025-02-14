@@ -3,6 +3,25 @@ import { LucideIcon } from "lucide-react";
 export type UserStatus = "ONLINE" | "IDLE" | "DND" | "OFFLINE";
 export type ChannelType = "TEXT" | "VOICE" | "ANNOUNCEMENT";
 
+export interface ServerMetadata {
+  boost_status: null | {
+    level: number;
+    count: number;
+  };
+  verification_level: number;
+  features: {
+    community: boolean;
+    welcome_screen: {
+      enabled: boolean;
+      description: string | null;
+      welcome_channels: Array<{
+        channel_id: string;
+        description: string;
+      }>;
+    };
+  };
+}
+
 export interface Server {
   id: string;
   name: string;
@@ -10,24 +29,7 @@ export interface Server {
   owner_id: string | null;
   created_at: string;
   updated_at: string;
-  metadata?: {
-    boost_status: null | {
-      level: number;
-      count: number;
-    };
-    verification_level: number;
-    features: {
-      community: boolean;
-      welcome_screen: {
-        enabled: boolean;
-        description: string | null;
-        welcome_channels: Array<{
-          channel_id: string;
-          description: string;
-        }>;
-      };
-    };
-  };
+  metadata: ServerMetadata;
 }
 
 export interface ServerMember {

@@ -2,7 +2,7 @@
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Server } from "@/types/server";
+import { Server, ServerMetadata } from "@/types/server";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateServerModal } from "./CreateServerModal";
 
@@ -33,26 +33,15 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
       // Transform the data to match the Server type
       const transformedServers: Server[] = (data || []).map(server => ({
         ...server,
-        metadata: server.metadata ? {
-          boost_status: server.metadata.boost_status,
-          verification_level: server.metadata.verification_level ?? 0,
+        metadata: {
+          boost_status: server.metadata?.boost_status ?? null,
+          verification_level: server.metadata?.verification_level ?? 0,
           features: {
-            community: server.metadata.features?.community ?? false,
+            community: server.metadata?.features?.community ?? false,
             welcome_screen: {
-              enabled: server.metadata.features?.welcome_screen?.enabled ?? false,
-              description: server.metadata.features?.welcome_screen?.description ?? null,
-              welcome_channels: server.metadata.features?.welcome_screen?.welcome_channels ?? []
-            }
-          }
-        } : {
-          boost_status: null,
-          verification_level: 0,
-          features: {
-            community: false,
-            welcome_screen: {
-              enabled: false,
-              description: null,
-              welcome_channels: []
+              enabled: server.metadata?.features?.welcome_screen?.enabled ?? false,
+              description: server.metadata?.features?.welcome_screen?.description ?? null,
+              welcome_channels: server.metadata?.features?.welcome_screen?.welcome_channels ?? []
             }
           }
         }
@@ -75,13 +64,43 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setServers(current => [...current, payload.new as Server]);
+            const newServer = payload.new as any;
+            setServers(current => [...current, {
+              ...newServer,
+              metadata: {
+                boost_status: newServer.metadata?.boost_status ?? null,
+                verification_level: newServer.metadata?.verification_level ?? 0,
+                features: {
+                  community: newServer.metadata?.features?.community ?? false,
+                  welcome_screen: {
+                    enabled: newServer.metadata?.features?.welcome_screen?.enabled ?? false,
+                    description: newServer.metadata?.features?.welcome_screen?.description ?? null,
+                    welcome_channels: newServer.metadata?.features?.welcome_screen?.welcome_channels ?? []
+                  }
+                }
+              }
+            }]);
           } else if (payload.eventType === 'DELETE') {
             setServers(current => current.filter(server => server.id !== payload.old.id));
           } else if (payload.eventType === 'UPDATE') {
+            const updatedServer = payload.new as any;
             setServers(current => 
               current.map(server => 
-                server.id === payload.new.id ? { ...server, ...payload.new } : server
+                server.id === updatedServer.id ? {
+                  ...updatedServer,
+                  metadata: {
+                    boost_status: updatedServer.metadata?.boost_status ?? null,
+                    verification_level: updatedServer.metadata?.verification_level ?? 0,
+                    features: {
+                      community: updatedServer.metadata?.features?.community ?? false,
+                      welcome_screen: {
+                        enabled: updatedServer.metadata?.features?.welcome_screen?.enabled ?? false,
+                        description: updatedServer.metadata?.features?.welcome_screen?.description ?? null,
+                        welcome_channels: updatedServer.metadata?.features?.welcome_screen?.welcome_channels ?? []
+                      }
+                    }
+                  }
+                } : server
               )
             );
           }
