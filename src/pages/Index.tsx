@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useToast } from "@/components/ui/use-toast";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -20,6 +21,7 @@ const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { signIn, signUp, user } = useAuth();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof authSchema>>({
     resolver: zodResolver(authSchema),
@@ -38,15 +40,37 @@ const Index = () => {
 
   const onSubmit = async (values: z.infer<typeof authSchema>) => {
     try {
+      toast({
+        title: "Processing...",
+        description: isLogin ? "Logging you in..." : "Creating your account...",
+      });
+
       if (isLogin) {
         await signIn(values.email, values.password);
+        toast({
+          title: "Success!",
+          description: "Welcome back to the pond! 🐸",
+        });
+        navigate("/dashboard");
       } else {
-        if (!values.username) return;
+        if (!values.username) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Username is required for signup",
+          });
+          return;
+        }
         await signUp(values.email, values.password, values.username);
+        toast({
+          title: "Success!",
+          description: "Your account has been created. Welcome to the pond! 🐸",
+        });
+        navigate("/dashboard");
       }
-      navigate("/dashboard");
     } catch (error) {
       console.error("Authentication error:", error);
+      // The error toast is now handled in the AuthContext
     }
   };
 
