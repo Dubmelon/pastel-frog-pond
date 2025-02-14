@@ -303,6 +303,7 @@ export type Database = {
           id: string
           joined_at: string | null
           nickname: string | null
+          roles: Json | null
           server_id: string | null
           user_id: string | null
         }
@@ -310,6 +311,7 @@ export type Database = {
           id?: string
           joined_at?: string | null
           nickname?: string | null
+          roles?: Json | null
           server_id?: string | null
           user_id?: string | null
         }
@@ -317,6 +319,7 @@ export type Database = {
           id?: string
           joined_at?: string | null
           nickname?: string | null
+          roles?: Json | null
           server_id?: string | null
           user_id?: string | null
         }
@@ -364,7 +367,9 @@ export type Database = {
           id: string
           joined_at: string | null
           muted: boolean | null
+          screen_share: boolean | null
           user_id: string | null
+          video_enabled: boolean | null
         }
         Insert: {
           channel_id?: string | null
@@ -372,7 +377,9 @@ export type Database = {
           id?: string
           joined_at?: string | null
           muted?: boolean | null
+          screen_share?: boolean | null
           user_id?: string | null
+          video_enabled?: boolean | null
         }
         Update: {
           channel_id?: string | null
@@ -380,7 +387,9 @@ export type Database = {
           id?: string
           joined_at?: string | null
           muted?: boolean | null
+          screen_share?: boolean | null
           user_id?: string | null
+          video_enabled?: boolean | null
         }
         Relationships: [
           {
@@ -402,6 +411,18 @@ export type Database = {
           server_name: string
           user_id: string
         }
+        Returns: string
+      }
+      create_server_invite: {
+        Args: {
+          server_id_input: string
+          max_uses?: number
+          expires_in?: unknown
+        }
+        Returns: string
+      }
+      generate_unique_invite_code: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
     }
