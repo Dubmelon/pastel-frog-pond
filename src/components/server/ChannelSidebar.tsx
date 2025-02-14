@@ -1,7 +1,8 @@
+
 import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic, HeadphoneOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Category, Channel } from "@/types/server";
+import { Category, Channel, ChannelType } from "@/types/server";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -14,32 +15,90 @@ interface ChannelSidebarProps {
 }
 
 // Mock data - in real app would come from API
-const initialCategories = [
+const initialCategories: Category[] = [
   {
     id: "1",
+    server_id: "mock-server-1",
     name: "TEXT CHANNELS",
-    type: "TEXT" as const,
+    position: 0,
     channels: [
-      { id: "1", name: "general", type: "text" as const, categoryId: "1", unreadCount: 2 },
-      { id: "2", name: "memes", type: "text" as const, categoryId: "1" },
-      { id: "3", name: "announcements", type: "text" as const, categoryId: "1" },
+      { 
+        id: "1", 
+        server_id: "mock-server-1",
+        category_id: "1", 
+        name: "general", 
+        type: "TEXT" as ChannelType, 
+        position: 0,
+        topic: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        unreadCount: 2 
+      },
+      { 
+        id: "2", 
+        server_id: "mock-server-1",
+        category_id: "1", 
+        name: "memes", 
+        type: "TEXT" as ChannelType, 
+        position: 1,
+        topic: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      { 
+        id: "3", 
+        server_id: "mock-server-1",
+        category_id: "1", 
+        name: "announcements", 
+        type: "TEXT" as ChannelType, 
+        position: 2,
+        topic: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
     ],
     isExpanded: true,
   },
   {
     id: "2",
+    server_id: "mock-server-1",
     name: "VOICE CHANNELS",
-    type: "VOICE" as const,
+    position: 1,
     channels: [
       { 
         id: "4", 
+        server_id: "mock-server-1",
+        category_id: "2", 
         name: "Pond Chat", 
-        type: "voice" as const, 
-        categoryId: "2",
+        type: "VOICE" as ChannelType, 
+        position: 0,
+        topic: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         isActive: true 
       },
-      { id: "5", name: "Music", type: "voice" as const, categoryId: "2" },
-      { id: "6", name: "Gaming", type: "voice" as const, categoryId: "2" },
+      { 
+        id: "5", 
+        server_id: "mock-server-1",
+        category_id: "2", 
+        name: "Music", 
+        type: "VOICE" as ChannelType, 
+        position: 1,
+        topic: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      { 
+        id: "6", 
+        server_id: "mock-server-1",
+        category_id: "2", 
+        name: "Gaming", 
+        type: "VOICE" as ChannelType, 
+        position: 2,
+        topic: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
     ],
     isExpanded: true,
   },
@@ -171,7 +230,7 @@ export const ChannelSidebar = ({
                         channel.isActive && "bg-primary/10 text-primary"
                       )}
                     >
-                      {channel.type === "text" ? (
+                      {channel.type === "TEXT" ? (
                         <Hash className="w-4 h-4 text-text-secondary" />
                       ) : (
                         <Speaker className="w-4 h-4 text-text-secondary" />
@@ -182,7 +241,7 @@ export const ChannelSidebar = ({
                           {channel.unreadCount}
                         </span>
                       )}
-                      {channel.type === "voice" && (
+                      {channel.type === "VOICE" && (
                         <button
                           onClick={(e) => handleVoiceJoin(e, channel)}
                           className="opacity-0 group-hover:opacity-100"
