@@ -22,6 +22,10 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onload = (e) => setImagePreview(e.target?.result as string);
@@ -42,10 +46,21 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      let iconUrl = null;
+      // Create server and get server ID
+      const { data: serverId, error: serverError } = await supabase.rpc(
+        'create_server',
+        { 
+          server_name: serverName,
+          user_id: user.id
+        }
+      );
+
+      if (serverError) throw serverError;
+
+      // If we have an image, upload it to storage
       if (selectedImage) {
         const fileExt = selectedImage.name.split('.').pop();
-        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `${serverId}/${crypto.randomUUID()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('server-icons')
@@ -57,25 +72,11 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
           .from('server-icons')
           .getPublicUrl(filePath);
 
-        iconUrl = publicUrl;
-      }
-
-      const { data, error: serverError } = await supabase.rpc(
-        'create_server',
-        { 
-          server_name: serverName,
-          user_id: user.id
-        }
-      );
-
-      if (serverError) throw serverError;
-
-      // If we have an icon URL, update the server with it
-      if (iconUrl) {
+        // Update server with icon URL
         const { error: updateError } = await supabase
           .from('servers')
-          .update({ icon_url: iconUrl })
-          .eq('id', data);
+          .update({ icon_url: publicUrl })
+          .eq('id', serverId);
 
         if (updateError) throw updateError;
       }
@@ -95,18 +96,18 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-[#FAFAF8] border-[#E6E4DD]">
         <DialogHeader>
-          <DialogTitle>Create a New Server</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-[#3A3935]">Create a New Server</DialogTitle>
+          <DialogDescription className="text-[#828179]">
             Create a new server to start chatting with your friends
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label>Server Icon</Label>
+            <Label className="text-[#3A3935]">Server Icon</Label>
             <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full bg-background-secondary flex items-center justify-center overflow-hidden group">
+              <div className="relative w-16 h-16 rounded-full bg-[#F6F1EB] flex items-center justify-center overflow-hidden group">
                 {imagePreview ? (
                   <img 
                     src={imagePreview} 
@@ -114,7 +115,7 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Upload className="w-6 h-6 text-text-secondary" />
+                  <Upload className="w-6 h-6 text-[#828179]" />
                 )}
                 <input
                   type="file"
@@ -122,24 +123,25 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
                   onChange={handleImageSelect}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Upload className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div className="text-sm text-text-secondary">
+              <div className="text-sm text-[#828179]">
                 <p>Recommended size: 128x128px</p>
                 <p>Max size: 5MB</p>
               </div>
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="serverName">Server Name</Label>
+            <Label htmlFor="serverName" className="text-[#3A3935]">Server Name</Label>
             <Input
               id="serverName"
               value={serverName}
               onChange={(e) => setServerName(e.target.value)}
               placeholder="Enter server name"
               maxLength={100}
+              className="bg-white border-[#E6E4DD] focus:ring-[#7EBF8E] focus:border-[#7EBF8E]"
             />
           </div>
           <div className="flex justify-end gap-4">
@@ -148,10 +150,15 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
+              className="border-[#E6E4DD] text-[#828179] hover:bg-[#F6F1EB] hover:text-[#3A3935]"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="bg-[#7EBF8E] hover:bg-[#7EBF8E]/90 text-white"
+            >
               {isLoading ? "Creating..." : "Create Server"}
             </Button>
           </div>
