@@ -554,6 +554,7 @@ export type Database = {
           features: Json | null
           icon_url: string | null
           id: string
+          metadata: Json | null
           name: string
           owner_id: string | null
           updated_at: string | null
@@ -564,6 +565,7 @@ export type Database = {
           features?: Json | null
           icon_url?: string | null
           id?: string
+          metadata?: Json | null
           name: string
           owner_id?: string | null
           updated_at?: string | null
@@ -574,6 +576,7 @@ export type Database = {
           features?: Json | null
           icon_url?: string | null
           id?: string
+          metadata?: Json | null
           name?: string
           owner_id?: string | null
           updated_at?: string | null
@@ -648,7 +651,7 @@ export type Database = {
       }
     }
     Enums: {
-      channel_type: "TEXT" | "VOICE"
+      channel_type: "TEXT" | "VOICE" | "ANNOUNCEMENT"
       user_status: "ONLINE" | "IDLE" | "DND" | "OFFLINE"
     }
     CompositeTypes: {

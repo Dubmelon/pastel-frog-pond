@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Channel, ChannelType } from "@/types/server";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Hash, Volume2 } from "lucide-react";
+import { Hash, Volume2, Megaphone } from "lucide-react";
 
 interface CreateChannelModalProps {
   serverId: string;
@@ -106,6 +106,12 @@ export const CreateChannelModal = ({ serverId, categoryId, onChannelCreated, chi
                     <Volume2 className="w-4 h-4" /> Voice
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="ANNOUNCEMENT" id="announcement" />
+                  <Label htmlFor="announcement" className="flex items-center gap-1">
+                    <Megaphone className="w-4 h-4" /> Announcement
+                  </Label>
+                </div>
               </RadioGroup>
             </div>
 
@@ -119,7 +125,7 @@ export const CreateChannelModal = ({ serverId, categoryId, onChannelCreated, chi
               />
             </div>
 
-            {channelType === "TEXT" && (
+            {channelType !== "VOICE" && (
               <>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">

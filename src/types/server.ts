@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 
 export type UserStatus = "ONLINE" | "IDLE" | "DND" | "OFFLINE";
-export type ChannelType = "TEXT" | "VOICE";
+export type ChannelType = "TEXT" | "VOICE" | "ANNOUNCEMENT";
 
 export interface Server {
   id: string;
@@ -10,6 +10,24 @@ export interface Server {
   owner_id: string | null;
   created_at: string;
   updated_at: string;
+  metadata?: {
+    boost_status: null | {
+      level: number;
+      count: number;
+    };
+    verification_level: number;
+    features: {
+      community: boolean;
+      welcome_screen: {
+        enabled: boolean;
+        description: string | null;
+        welcome_channels: Array<{
+          channel_id: string;
+          description: string;
+        }>;
+      };
+    };
+  };
 }
 
 export interface ServerMember {
@@ -48,6 +66,14 @@ export interface Channel {
   updated_at: string;
   unreadCount?: number;
   isActive?: boolean;
+}
+
+export interface ChannelPin {
+  id: string;
+  channel_id: string;
+  message_id: string;
+  pinned_by: string;
+  pinned_at: string;
 }
 
 export interface ChannelMemberState {
