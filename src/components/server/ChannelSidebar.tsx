@@ -1,5 +1,5 @@
 
-import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic, HeadphoneOff } from "lucide-react";
+import { Hash, Speaker, ChevronRight, Settings, Plus, Users, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Category, Channel, ChannelType } from "@/types/server";
@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { UserSettings } from "./UserSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { CreateChannelModal } from "./modals/CreateChannelModal";
 
 interface ChannelSidebarProps {
   serverId: string | null;
@@ -49,6 +50,7 @@ export const ChannelSidebar = ({
             name,
             position,
             collapsed,
+            server_id,
             channels (
               id,
               name,
@@ -66,9 +68,9 @@ export const ChannelSidebar = ({
         if (categoriesError) throw categoriesError;
 
         // Transform and sort the data
-        const transformedCategories = categoriesData.map(cat => ({
+        const transformedCategories = (categoriesData || []).map(cat => ({
           ...cat,
-          channels: cat.channels.sort((a, b) => a.position - b.position)
+          channels: (cat.channels || []).sort((a, b) => a.position - b.position)
         }));
 
         setCategories(loadCollapsedState(transformedCategories));
@@ -93,7 +95,7 @@ export const ChannelSidebar = ({
           table: 'categories',
           filter: `server_id=eq.${serverId}`
         },
-        (payload) => {
+        () => {
           fetchData(); // Refresh data on any changes
         }
       )
@@ -105,7 +107,7 @@ export const ChannelSidebar = ({
           table: 'channels',
           filter: `server_id=eq.${serverId}`
         },
-        (payload) => {
+        () => {
           fetchData(); // Refresh data on any channel changes
         }
       )
@@ -209,14 +211,17 @@ export const ChannelSidebar = ({
                   )} 
                 />
                 <span className="text-xs font-semibold">{category.name}</span>
-                <Plus 
-                  className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // TODO: Implement create channel modal
-                    console.log("Create channel in category:", category.name);
-                  }}
-                />
+                {serverId && (
+                  <CreateChannelModal
+                    serverId={serverId}
+                    categoryId={category.id}
+                    onChannelCreated={() => {}}
+                  >
+                    <Plus 
+                      className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 cursor-pointer" 
+                    />
+                  </CreateChannelModal>
+                )}
               </button>
               
               {category.isExpanded && (
