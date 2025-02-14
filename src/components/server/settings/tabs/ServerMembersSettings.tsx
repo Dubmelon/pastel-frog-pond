@@ -16,7 +16,7 @@ export const ServerMembersSettings = ({ serverId }: ServerMembersSettingsProps) 
         .from('server_members')
         .select(`
           *,
-          profile:profiles(*)
+          profile:profiles!user_id(*)
         `)
         .eq('server_id', serverId);
 
@@ -25,7 +25,13 @@ export const ServerMembersSettings = ({ serverId }: ServerMembersSettingsProps) 
         return;
       }
 
-      setMembers(data);
+      // Transform the data to match our types
+      const transformedData = data.map(member => ({
+        ...member,
+        roles: member.roles as string[] || [], // Cast JSON to string[]
+      })) as (ServerMember & { profile: Profile })[];
+
+      setMembers(transformedData);
     };
 
     fetchMembers();

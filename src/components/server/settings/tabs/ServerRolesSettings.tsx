@@ -23,7 +23,13 @@ export const ServerRolesSettings = ({ serverId }: ServerRolesSettingsProps) => {
         return;
       }
 
-      setRoles(data);
+      // Transform the data to match our Role type
+      const transformedRoles = data.map(role => ({
+        ...role,
+        permissions: role.permissions as Role['permissions'] // Cast JSON to our permissions type
+      }));
+
+      setRoles(transformedRoles);
     };
 
     fetchRoles();
