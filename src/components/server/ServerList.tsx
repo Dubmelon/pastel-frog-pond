@@ -21,21 +21,9 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // First get the server IDs where the user is a member
-      const { data: memberships } = await supabase
-        .from('server_members')
-        .select('server_id')
-        .eq('user_id', user.id);
-
-      if (!memberships) return;
-
-      const serverIds = memberships.map(m => m.server_id);
-
-      // Then fetch the servers
       const { data, error } = await supabase
         .from('servers')
         .select('*')
-        .in('id', serverIds)
         .order('created_at');
 
       if (error) {
@@ -58,22 +46,9 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
           schema: 'public',
           table: 'servers'
         },
-        async (payload) => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) return;
-
+        (payload) => {
           if (payload.eventType === 'INSERT') {
-            // Check if the user is a member of this server
-            const { data: membership } = await supabase
-              .from('server_members')
-              .select('*')
-              .eq('server_id', payload.new.id)
-              .eq('user_id', user.id)
-              .single();
-
-            if (membership) {
-              setServers(current => [...current, payload.new as Server]);
-            }
+            setServers(current => [...current, payload.new as Server]);
           } else if (payload.eventType === 'DELETE') {
             setServers(current => current.filter(server => server.id !== payload.old.id));
           } else if (payload.eventType === 'UPDATE') {
