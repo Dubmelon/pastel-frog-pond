@@ -43,8 +43,29 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
     setIsLoading(true);
     try {
       // Get the current user's ID
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
       if (!user) throw new Error("Not authenticated");
+
+      let iconUrl = null;
+
+      // If we have an image, upload it first
+      if (selectedImage) {
+        const fileExt = selectedImage.name.split('.').pop();
+        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+        
+        const { error: uploadError, data } = await supabase.storage
+          .from('server-icons')
+          .upload(filePath, selectedImage);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('server-icons')
+          .getPublicUrl(filePath);
+
+        iconUrl = publicUrl;
+      }
 
       // Create server
       const { data: serverId, error: serverError } = await supabase.rpc(
@@ -57,37 +78,11 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
 
       if (serverError) throw serverError;
 
-      // If we have an image, create storage bucket and upload
-      if (selectedImage) {
-        // Ensure the bucket exists
-        const { error: storageError } = await supabase
-          .storage
-          .createBucket('server-icons', {
-            public: true,
-            fileSizeLimit: 5242880 // 5MB
-          });
-
-        if (storageError && !storageError.message.includes('already exists')) {
-          throw storageError;
-        }
-
-        const fileExt = selectedImage.name.split('.').pop();
-        const filePath = `${serverId}/${crypto.randomUUID()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('server-icons')
-          .upload(filePath, selectedImage);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('server-icons')
-          .getPublicUrl(filePath);
-
-        // Update server with icon URL
+      // Update server with icon URL if we have one
+      if (iconUrl) {
         const { error: updateError } = await supabase
           .from('servers')
-          .update({ icon_url: publicUrl })
+          .update({ icon_url: iconUrl })
           .eq('id', serverId);
 
         if (updateError) throw updateError;
@@ -97,7 +92,11 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
       onClose();
     } catch (error) {
       console.error('Error creating server:', error);
-      toast.error("Failed to create server");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to create server");
+      }
     } finally {
       setIsLoading(false);
       setServerName("");
