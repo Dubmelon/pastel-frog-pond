@@ -67,9 +67,7 @@ export const ChannelSidebar = ({
               topic,
               settings,
               created_at,
-              updated_at,
-              server_id,
-              category_id
+              updated_at
             )
           `)
           .eq('server_id', serverId)
@@ -83,6 +81,8 @@ export const ChannelSidebar = ({
           channels: (cat.channels || [])
             .map(channel => ({
               ...channel,
+              server_id: serverId,
+              category_id: cat.id,
               settings: channel.settings || {
                 slowmode: 0,
                 nsfw: false,
@@ -90,7 +90,7 @@ export const ChannelSidebar = ({
               }
             }))
             .sort((a, b) => a.position - b.position)
-        }));
+        })) as Category[];
 
         setCategories(loadCollapsedState(transformedCategories));
       } catch (err) {
@@ -276,7 +276,7 @@ export const ChannelSidebar = ({
               >
                 <ChevronRight 
                   className={cn(
-                    "w-3 h-3 transition-transform",
+                    "w-3 h-3 transition-transform duration-200",
                     category.isExpanded && "rotate-90"
                   )} 
                 />
@@ -294,29 +294,34 @@ export const ChannelSidebar = ({
                 )}
               </button>
               
-              {category.isExpanded && (
-                <DndContext 
-                  sensors={sensors}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext 
-                    items={category.channels.map(ch => ch.id)}
-                    strategy={verticalListSortingStrategy}
+              <div className={cn(
+                "overflow-hidden transition-all duration-200 ease-in-out",
+                category.isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+              )}>
+                {category.isExpanded && (
+                  <DndContext 
+                    sensors={sensors}
+                    onDragEnd={handleDragEnd}
                   >
-                    <div className="space-y-0.5">
-                      {category.channels.map((channel) => (
-                        <SortableChannel
-                          key={channel.id}
-                          channel={channel}
-                          isActive={channel.id === activeChannelId}
-                          onSelect={onChannelSelect}
-                          onSettingsClick={handleChannelSettings}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
+                    <SortableContext 
+                      items={category.channels.map(ch => ch.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-0.5">
+                        {category.channels.map((channel) => (
+                          <SortableChannel
+                            key={channel.id}
+                            channel={channel}
+                            isActive={channel.id === activeChannelId}
+                            onSelect={onChannelSelect}
+                            onSettingsClick={() => {}}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+              </div>
             </div>
           ))}
         </div>
