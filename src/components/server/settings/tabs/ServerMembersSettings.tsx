@@ -55,36 +55,49 @@ export const ServerMembersSettings = ({ serverId }: ServerMembersSettingsProps) 
         const profile = profileData.find(p => p.id === member.user_id);
         if (!profile) return null;
 
+        const defaultVoiceSettings = {
+          input_device: null,
+          output_device: null,
+          input_volume: 100,
+          output_volume: 100,
+          vad_sensitivity: 50,
+          noise_suppression: true,
+          echo_cancellation: true
+        };
+
+        const defaultNotificationPreferences = {
+          desktop_notifications: true,
+          sound_notifications: true,
+          mention_notifications: true,
+          message_notifications: "mentions" as const,
+          custom_sounds: {}
+        };
+
         const transformedProfile: Profile = {
-          ...profile,
-          voice_settings: {
-            input_device: profile.voice_settings?.input_device || null,
-            output_device: profile.voice_settings?.output_device || null,
-            input_volume: profile.voice_settings?.input_volume || 100,
-            output_volume: profile.voice_settings?.output_volume || 100,
-            vad_sensitivity: profile.voice_settings?.vad_sensitivity || 50,
-            noise_suppression: profile.voice_settings?.noise_suppression ?? true,
-            echo_cancellation: profile.voice_settings?.echo_cancellation ?? true
-          },
-          notification_preferences: {
-            desktop_notifications: profile.notification_preferences?.desktop_notifications ?? true,
-            sound_notifications: profile.notification_preferences?.sound_notifications ?? true,
-            mention_notifications: profile.notification_preferences?.mention_notifications ?? true,
-            message_notifications: profile.notification_preferences?.message_notifications || "mentions",
-            custom_sounds: profile.notification_preferences?.custom_sounds || {}
-          },
+          id: profile.id,
+          username: profile.username,
+          avatar_url: profile.avatar_url || null,
           status: profile.status || "OFFLINE",
           custom_status: profile.custom_status || null,
-          avatar_url: profile.avatar_url || null,
+          voice_settings: {
+            ...defaultVoiceSettings,
+            ...(typeof profile.voice_settings === 'object' ? profile.voice_settings : {})
+          },
+          notification_preferences: {
+            ...defaultNotificationPreferences,
+            ...(typeof profile.notification_preferences === 'object' ? profile.notification_preferences : {})
+          },
           created_at: profile.created_at || new Date().toISOString(),
           updated_at: profile.updated_at || new Date().toISOString()
         };
 
         const transformedMember: ServerMember = {
-          ...member,
-          roles: Array.isArray(member.roles) ? member.roles : [],
+          id: member.id,
+          server_id: member.server_id || "",
+          user_id: member.user_id || "",
           nickname: member.nickname || null,
-          joined_at: member.joined_at || new Date().toISOString()
+          joined_at: member.joined_at || new Date().toISOString(),
+          roles: Array.isArray(member.roles) ? member.roles.map(String) : []
         };
 
         return {

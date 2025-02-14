@@ -46,7 +46,7 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Create server and get server ID
+      // Create server
       const { data: serverId, error: serverError } = await supabase.rpc(
         'create_server',
         { 
@@ -57,8 +57,20 @@ export const CreateServerModal = ({ isOpen, onClose }: CreateServerModalProps) =
 
       if (serverError) throw serverError;
 
-      // If we have an image, upload it to storage
+      // If we have an image, create storage bucket and upload
       if (selectedImage) {
+        // Ensure the bucket exists
+        const { error: storageError } = await supabase
+          .storage
+          .createBucket('server-icons', {
+            public: true,
+            fileSizeLimit: 5242880 // 5MB
+          });
+
+        if (storageError && !storageError.message.includes('already exists')) {
+          throw storageError;
+        }
+
         const fileExt = selectedImage.name.split('.').pop();
         const filePath = `${serverId}/${crypto.randomUUID()}.${fileExt}`;
         
