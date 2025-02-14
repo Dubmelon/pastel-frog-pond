@@ -21,15 +21,21 @@ export const ServerList = ({ activeServerId, onServerSelect }: ServerListProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // First get the server IDs where the user is a member
+      const { data: memberships } = await supabase
+        .from('server_members')
+        .select('server_id')
+        .eq('user_id', user.id);
+
+      if (!memberships) return;
+
+      const serverIds = memberships.map(m => m.server_id);
+
+      // Then fetch the servers
       const { data, error } = await supabase
         .from('servers')
         .select('*')
-        .in('id', (
-          supabase
-            .from('server_members')
-            .select('server_id')
-            .eq('user_id', user.id)
-        ))
+        .in('id', serverIds)
         .order('created_at');
 
       if (error) {
