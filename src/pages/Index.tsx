@@ -4,21 +4,50 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+const authSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters").optional(),
+});
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { signIn, signUp, user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // For now, just simulate login and navigate to dashboard
-    toast({
-      title: isLogin ? "Welcome back!" : "Account created!",
-      description: "Taking you to your dashboard...",
-    });
+  const form = useForm<z.infer<typeof authSchema>>({
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      username: "",
+    },
+  });
+
+  // Redirect if already logged in
+  if (user) {
     navigate("/dashboard");
+    return null;
+  }
+
+  const onSubmit = async (values: z.infer<typeof authSchema>) => {
+    try {
+      if (isLogin) {
+        await signIn(values.email, values.password);
+      } else {
+        if (!values.username) return;
+        await signUp(values.email, values.password, values.username);
+      }
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Authentication error:", error);
+    }
   };
 
   return (
@@ -40,28 +69,57 @@ const Index = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Input
-              type="email"
-              placeholder="Email"
-              className="bg-white/50"
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="frog@pond.com" className="bg-white/50" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Input
-              type="password"
-              placeholder="Password"
-              className="bg-white/50"
-              required
-            />
-          </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary-hover">
-            {isLogin ? "Log In" : "Sign Up"}
-          </Button>
-        </form>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" className="bg-white/50" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {!isLogin && (
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="froggylicious" className="bg-white/50" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <Button type="submit" className="w-full bg-primary hover:bg-primary-hover">
+              {isLogin ? "Log In" : "Sign Up"}
+            </Button>
+          </form>
+        </Form>
 
         <div className="text-center">
           <Button
