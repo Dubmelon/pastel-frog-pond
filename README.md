@@ -1,69 +1,168 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🐸 Froggy - A Discord-Inspired Social Platform
 
-**URL**: https://lovable.dev/projects/966d1bbd-c929-4ae8-ae3c-712da79a2121
+Welcome to Froggy, a unique social platform that combines the community-driven features of Discord with the dynamic content flow of Twitter, all wrapped in a delightful pastel frog aesthetic.
 
-## How can I edit this code?
+## 🌟 Features
 
-There are several ways of editing your application.
+### Authentication & User Management
+- Email/password authentication
+- User profiles with customizable avatars and usernames
+- Real-time online status tracking
+- Custom status messages
 
-**Use Lovable**
+### Server System
+- Create and join community servers
+- Hierarchical channel structure
+  - Text channels
+  - Voice channels
+  - Announcement channels
+- Server customization options
+  - Server icons
+  - Role management
+  - Permission systems
+- Invite system with configurable invite links
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/966d1bbd-c929-4ae8-ae3c-712da79a2121) and start prompting.
+### Communication Features
+- Real-time messaging
+- Thread support
+- Message reactions and pins
+- File attachments
+- Voice chat capabilities
+- Screen sharing
+- Message history
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🏗 Technical Architecture
 
-**Use your preferred IDE**
+### Database Schema
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+#### Core Tables
+1. **profiles**
+   - Stores user information
+   - Fields: id, username, avatar_url, status, custom_status
+   - Connected to Supabase auth.users
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. **servers**
+   - Community spaces
+   - Fields: id, name, icon_url, owner_id, metadata
+   - Features: verification levels, boost status, community features
 
-Follow these steps:
+3. **categories**
+   - Channel groupings within servers
+   - Fields: id, server_id, name, position
+   - Hierarchical organization of channels
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4. **channels**
+   - Communication spaces
+   - Types: TEXT, VOICE, ANNOUNCEMENT
+   - Fields: id, server_id, category_id, name, type, position, topic, settings
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+5. **messages**
+   - Content storage
+   - Fields: id, channel_id, author_id, content, attachments
+   - Supports: threads, edits, reactions
 
-# Step 3: Install the necessary dependencies.
-npm i
+#### Relationship Tables
+1. **server_members**
+   - Links users to servers
+   - Fields: id, server_id, user_id, nickname, roles, joined_at
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+2. **member_roles**
+   - Role assignments
+   - Fields: member_id, role_id
+
+3. **channel_member_states**
+   - User state in channels
+   - Fields: channel_id, user_id, last_read_at, mention_count, muted
+
+### Security & Permissions
+
+#### Row Level Security (RLS)
+- Server access restricted to members
+- Channel access based on server membership and role permissions
+- Message visibility controlled by channel access
+- Profile information visible to authenticated users
+
+#### Role-Based Access Control
+- Hierarchical permission system
+- Granular channel permissions
+- Server-wide role management
+- Custom role colors and positions
+
+### Real-time Features
+- Implemented using Supabase's real-time subscriptions
+- Message delivery
+- Online status updates
+- Typing indicators
+- Voice state synchronization
+
+## 🎨 UI/UX Design Philosophy
+
+### Theme
+- Pastel color palette inspired by frogs and nature
+- Soft, organic shapes and transitions
+- Glassmorphism effects for depth
+- High contrast for accessibility
+
+### Layout
+- Responsive design for all screen sizes
+- Intuitive navigation
+- Clean, uncluttered interfaces
+- Consistent spacing and alignment
+
+## 🚀 Getting Started
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Start the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🔧 Technology Stack
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Frontend**
+  - React with TypeScript
+  - Vite for build tooling
+  - Tailwind CSS for styling
+  - Shadcn UI components
+  - React Query for data management
 
-**Use GitHub Codespaces**
+- **Backend** (Supabase)
+  - PostgreSQL database
+  - Authentication
+  - Real-time subscriptions
+  - Storage for files and media
+  - Row Level Security
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📦 Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/         # Reusable UI components
+│   ├── server/        # Server-related components
+│   ├── ui/            # Base UI components
+│   └── auth/          # Authentication components
+├── contexts/          # React contexts
+├── hooks/             # Custom React hooks
+├── pages/             # Route components
+├── types/             # TypeScript definitions
+└── utils/             # Utility functions
+```
 
-This project is built with .
+## 🤝 Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+We welcome contributions! Please see our contributing guidelines for more information.
 
-## How can I deploy this project?
+## 📄 License
 
-Simply open [Lovable](https://lovable.dev/projects/966d1bbd-c929-4ae8-ae3c-712da79a2121) and click on Share -> Publish.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
