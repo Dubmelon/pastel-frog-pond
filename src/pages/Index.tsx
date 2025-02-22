@@ -34,25 +34,28 @@ const Index = () => {
 
   // Redirect if already logged in
   if (user) {
+    console.log("User is already logged in, redirecting to dashboard");
     navigate("/dashboard");
     return null;
   }
 
   const onSubmit = async (values: z.infer<typeof authSchema>) => {
+    console.log("Form submitted with values:", values);
+    
     try {
-      toast({
-        title: "Processing...",
-        description: isLogin ? "Logging you in..." : "Creating your account...",
-      });
-
       if (isLogin) {
+        console.log("Attempting to sign in...");
         await signIn(values.email, values.password);
+        console.log("Sign in successful");
+        
         toast({
-          title: "Success!",
-          description: "Welcome back to the pond! 🐸",
+          title: "Welcome back! 🐸",
+          description: "Successfully logged in",
         });
+        
         navigate("/dashboard");
       } else {
+        console.log("Attempting to sign up...");
         if (!values.username) {
           toast({
             variant: "destructive",
@@ -61,11 +64,15 @@ const Index = () => {
           });
           return;
         }
+        
         await signUp(values.email, values.password, values.username);
+        console.log("Sign up successful");
+        
         toast({
-          title: "Success!",
-          description: "Your account has been created. Welcome to the pond! 🐸",
+          title: "Welcome to the pond! 🐸",
+          description: "Your account has been created successfully.",
         });
+        
         navigate("/dashboard");
       }
     } catch (error) {
