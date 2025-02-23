@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -32,12 +32,12 @@ const Index = () => {
     },
   });
 
-  // Redirect if already logged in
-  if (user) {
-    console.log("User is already logged in, redirecting to dashboard");
-    navigate("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      console.log("User detected, redirecting to dashboard");
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const onSubmit = async (values: z.infer<typeof authSchema>) => {
     console.log("Form submitted with values:", values);
@@ -46,14 +46,6 @@ const Index = () => {
       if (isLogin) {
         console.log("Attempting to sign in...");
         await signIn(values.email, values.password);
-        console.log("Sign in successful");
-        
-        toast({
-          title: "Welcome back! 🐸",
-          description: "Successfully logged in",
-        });
-        
-        navigate("/dashboard");
       } else {
         console.log("Attempting to sign up...");
         if (!values.username) {
@@ -64,20 +56,11 @@ const Index = () => {
           });
           return;
         }
-        
         await signUp(values.email, values.password, values.username);
-        console.log("Sign up successful");
-        
-        toast({
-          title: "Welcome to the pond! 🐸",
-          description: "Your account has been created successfully.",
-        });
-        
-        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Authentication error:", error);
-      // The error toast is now handled in the AuthContext
+      // Error toasts are now handled in the AuthContext
     }
   };
 

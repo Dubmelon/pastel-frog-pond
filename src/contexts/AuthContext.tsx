@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed:", _event, session ? "Session exists" : "No session");
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -40,52 +41,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     console.log("Attempting to sign in with email:", email);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      console.error("Sign in error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error signing in",
-        description: error.message,
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+
+      if (error) {
+        console.error("Sign in error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error signing in",
+          description: error.message,
+        });
+        throw error;
+      }
+
+      console.log("Sign in successful:", data.user?.id);
+      setUser(data.user);
+      
+      toast({
+        title: "Welcome back! 🐸",
+        description: "Successfully logged in",
+      });
+    } catch (error) {
+      console.error("Unexpected error during sign in:", error);
       throw error;
     }
-
-    console.log("Sign in successful:", data.user?.id);
-    return;
   };
 
   const signUp = async (email: string, password: string, username: string) => {
     console.log("Attempting to sign up with email:", email);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          },
         },
-      },
-    });
-
-    if (error) {
-      console.error("Sign up error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error signing up",
-        description: error.message,
       });
+
+      if (error) {
+        console.error("Sign up error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error signing up",
+          description: error.message,
+        });
+        throw error;
+      }
+
+      console.log("Sign up successful:", data.user?.id);
+      setUser(data.user);
+      
+      toast({
+        title: "Welcome to the pond! 🐸",
+        description: "Your account has been created successfully.",
+      });
+    } catch (error) {
+      console.error("Unexpected error during sign up:", error);
       throw error;
     }
-
-    console.log("Sign up successful:", data.user?.id);
-    toast({
-      title: "Welcome to the pond! 🐸",
-      description: "Your account has been created successfully.",
-    });
   };
 
   const signOut = async () => {
@@ -100,6 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       throw error;
     }
+    setUser(null);
     console.log("Sign out successful");
   };
 
