@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -20,7 +21,7 @@ const authSchema = z.object({
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof authSchema>>({
@@ -64,6 +65,15 @@ const Index = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      // Error toasts are handled in the AuthContext
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background-secondary flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6 space-y-6 glass">
@@ -81,6 +91,30 @@ const Index = () => {
               ? "Hop back into your favorite lily pad"
               : "Create your account and start your journey"}
           </p>
+        </div>
+
+        <Button 
+          variant="outline" 
+          className="w-full bg-white hover:bg-gray-50"
+          onClick={handleGoogleSignIn}
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google"
+            className="w-5 h-5 mr-2"
+          />
+          Continue with Google
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <Separator className="w-full" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with email
+            </span>
+          </div>
         </div>
 
         <Form {...form}>
